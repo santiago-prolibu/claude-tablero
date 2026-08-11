@@ -110,7 +110,7 @@
   /* ─ tabla de cuentas ─ */
   .tabla { border: 1px solid var(--borde); border-radius: 12px; background: var(--carta);
            margin-top: 16px; overflow: hidden; animation: entra .45s ease-out .07s both; }
-  .thead, .filacta { display: grid; grid-template-columns: 130px 1fr 1fr minmax(210px, 320px); gap: 18px; align-items: center; padding: 14px 20px; }
+  .thead, .filacta { display: grid; grid-template-columns: 130px 1fr 1fr minmax(200px, 280px); gap: 18px; align-items: center; padding: 14px 20px; }
   .thead > *, .filacta > * { min-width: 0; }
   .thead { padding: 10px 20px; background: var(--carta-2); border-bottom: 1px solid var(--borde);
            font-family: "Geist Mono", ui-monospace, monospace; font-size: 11px; letter-spacing: .05em;
@@ -126,7 +126,16 @@
   .cta-id .etiq { font-family: "Geist Mono", ui-monospace, monospace; font-size: 10.5px; color: var(--tinta-3); white-space: nowrap; }
   .medidor .fila { display: flex; justify-content: space-between; gap: 10px; font-family: "Geist Mono", ui-monospace, monospace;
                    font-size: 11.5px; color: var(--tinta-3); margin-bottom: 6px; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .medidor .fila .uso { color: var(--tinta); overflow: hidden; text-overflow: ellipsis; }
+  .medidor .fila .uso { color: var(--tinta); flex: none; } /* el % jamás se trunca */
+  .medidor .fila .t-reset { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+
+  /* ─ alarmas: agotada parpadea, media carga pulsa suave ─ */
+  @keyframes alarma { 0%, 100% { opacity: 1 } 50% { opacity: .25 } }
+  .filacta.alerta .punto { animation: alarma 1.1s ease-in-out infinite;
+                           box-shadow: 0 0 0 4px color-mix(in srgb, var(--rojo) 18%, transparent); }
+  .filacta.alerta .etiq { color: var(--rojo); font-weight: 500; }
+  .filacta.alerta .relleno { animation: alarma 1.6s ease-in-out infinite; }
+  .filacta.ojo .punto { animation: pulso 2.4s ease-in-out infinite; }
   .maqs { text-align: right; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
   .maq { min-width: 0; }
   .maq .host { font-family: "Geist Mono", ui-monospace, monospace; font-size: 12px; color: var(--tinta);
@@ -229,7 +238,7 @@ function barra(pct) {
 function medidor(nombre, ventana, viejo) {
   return `<div class="medidor">
     <div class="fila">
-      <span class="uso">${nombre} · ${esc(String(ventana.pct))}% usado</span>
+      <span class="uso">${nombre} · ${esc(String(ventana.pct))}%</span>
       <span class="t-reset" data-reset="${esc(String(ventana.resetea || ""))}" data-viejo="${viejo ? 1 : 0}"></span>
     </div>
     ${barra(ventana.pct)}
@@ -285,7 +294,8 @@ function pintar(estado) {
       ? `${ETIQUETA[c.semaforo]}${vieja ? ` · dato de <span class="t-hace" data-ts="${esc(String(c.medido))}"></span>` : ""}`
       : "cupo desconocido";
     const maqs = c.maquinas.length ? c.maquinas.map(maqHtml).join("") : `<div class="maq"><div class="det">—</div></div>`;
-    html += `<div class="filacta ${vieja ? "vieja" : ""}" style="--color-barra:${color};animation-delay:${.1 + i * .06}s">
+    const alarma = c.semaforo === "rojo" ? "alerta" : (c.semaforo === "amarillo" ? "ojo" : "");
+    html += `<div class="filacta ${vieja ? "vieja" : ""} ${alarma}" style="--color-barra:${color};animation-delay:${.1 + i * .06}s">
       <div class="cta-id"><span class="punto"></span><span style="min-width:0">
         <span class="alias">${esc(c.alias)}</span><br><span class="etiq">${etiq}</span></span></div>
       ${c.cupo ? medidor("5 h", c.cupo.cinco_horas, vieja) : `<div class="sindato-txt">sin medición — se llena cuando un compu entre a esta cuenta</div>`}
@@ -307,6 +317,9 @@ function pintar(estado) {
         return `<div class="maqfila"><span>${esc(m.clave)}</span><span>${det}${extra}</span></div>`;
       }).join("")}</div>`;
   }
+
+  const agotadas = agg.cuentas.filter(c => c.semaforo === "rojo").length;
+  document.title = (agotadas ? "🔴 " : "") + "Cuentas Claude";
 
   document.getElementById("app").innerHTML = html;
   if (primeraPintura) {
