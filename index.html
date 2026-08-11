@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tablero cuentas Claude</title>
+<style>
+  :root {
+    --fondo: #f6f7f9; --tarjeta: #ffffff; --texto: #1a1d21; --sutil: #6b7280;
+    --verde: #16a34a; --amarillo: #d97706; --rojo: #dc2626; --pista: #e5e7eb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --fondo: #101418; --tarjeta: #1a2027; --texto: #e7eaee; --sutil: #94a3b8; --pista: #2b3440; }
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: var(--fondo); color: var(--texto);
+         font: 16px/1.5 -apple-system, system-ui, sans-serif; padding: 16px;
+         max-width: 640px; margin: 0 auto; }
+  .banner { border-radius: 12px; padding: 14px 16px; margin-bottom: 16px;
+            background: var(--tarjeta); border-left: 5px solid var(--verde);
+            font-size: 18px; font-weight: 600; }
+  .banner.sin-dato { border-left-color: var(--sutil); color: var(--sutil); }
+  .tarjeta { background: var(--tarjeta); border-radius: 12px; padding: 14px 16px;
+             margin-bottom: 12px; }
+  .tarjeta.vieja { opacity: .55; }
+  .cabecera { display: flex; justify-content: space-between; align-items: baseline; }
+  .alias { font-size: 17px; font-weight: 700; }
+  .reset { color: var(--sutil); font-size: 13px; }
+  .medidor { margin-top: 8px; }
+  .medidor .etiqueta { display: flex; justify-content: space-between;
+                       font-size: 13px; color: var(--sutil); }
+  .pista { background: var(--pista); border-radius: 6px; height: 8px; margin-top: 3px; }
+  .relleno { height: 100%; border-radius: 6px; }
+  .verde .relleno { background: var(--verde); }
+  .amarillo .relleno { background: var(--amarillo); }
+  .rojo .relleno { background: var(--rojo); }
+  .compus { margin-top: 10px; font-size: 14px; }
+  .compu { display: flex; justify-content: space-between; padding: 3px 0; }
+  .compu.viejo { color: var(--sutil); }
+  h2 { font-size: 14px; color: var(--sutil); margin: 18px 0 8px; text-transform: uppercase; }
+  .pie { color: var(--sutil); font-size: 13px; margin-top: 16px;
+         display: flex; justify-content: space-between; align-items: center; }
+  button { background: none; border: 1px solid var(--pista); color: var(--texto);
+           border-radius: 8px; padding: 6px 12px; font-size: 13px; }
+</style>
+</head>
+<body>
+<div id="app">Cargando…</div>
+<div class="pie"><span id="actualizado"></span><button onclick="cargar()">Refrescar</button></div>
+<script src="agregacion.js"></script>
+<script>
+const GIST_ID = "5b820c7ae6023afbfb862b25b5e4c177"; // mismo valor que reportar.py
+let ultimoEstado = null;
+
+function esc(s) {
+  return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+}
+
+function cuentaRegresiva(iso, ahora, viejo) {
+  if (!iso) return "";
+  const s = (Date.parse(iso) - Date.parse(ahora)) / 1000;
+  if (s <= 0) return viejo ? "ventana reseteada" : "reseteando…";
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+  return h ? `resetea en ${h} h ${m} m` : `resetea en ${m} m`;
+}
+
+function medidor(nombre, ventana, clase, ahora, viejo) {
+  return `<div class="medidor ${clase}">
+    <div class="etiqueta"><span>${nombre} · ${ventana.pct}%</span>
+      <span>${esc(cuentaRegresiva(ventana.resetea, ahora, viejo))}</span></div>
+    <div class="pista"><div class="relleno" style="width:${Math.min(ventana.pct, 100)}%"></div></div>
+  </div>`;
+}
+
+function compuHtml(m, ahora) {
+  const act = m.ultima_actividad;
+  const det = act ? `${humanizar((Date.parse(ahora) - Date.parse(act.hace)) / 1000)} · ${esc(act.proyecto || "?")}`
+                  : "sin actividad";
+  const extra = m.fresco ? "" :
+    ` · sin reporte ${humanizar((Date.parse(ahora) - Date.parse(m.reportado)) / 1000)}`;
+  return `<div class="compu ${m.fresco ? "" : "viejo"}"><span>${esc(m.clave)}</span><span>${det}${extra}</span></div>`;
+}
+
+function pintar(estado) {
+  const ahora = new Date().toISOString();
+  const agg = agregar(estado, ahora);
+  let html = "";
+  const r = agg.recomendada;
+  if (r === null) {
+    html += `<div class="banner sin-dato">Sin dato de cupo</div>`;
+  } else {
+    const nota = r.dato_de_hace_s > FRESCO_S
+      ? ` <small>(con dato de ${humanizar(r.dato_de_hace_s)})</small>` : "";
+    html += `<div class="banner">→ Usa: ${esc(r.alias)}${nota}</div>`;
+  }
+  for (const c of agg.cuentas) {
+    const vieja = c.cupo && !c.fresco;
+    html += `<div class="tarjeta ${vieja ? "vieja" : ""}">
+      <div class="cabecera"><span class="alias">${esc(c.alias)}</span>
+        <span class="reset">${c.cupo && vieja ? "dato de " + humanizar((Date.parse(ahora) - Date.parse(c.medido)) / 1000) : ""}</span></div>`;
+    if (c.cupo) {
+      html += medidor("5 h", c.cupo.cinco_horas, c.semaforo, ahora, vieja);
+      html += medidor("Semana", c.cupo.semanal, c.semaforo, ahora, vieja);
+    } else {
+      html += `<div class="reset">cupo desconocido</div>`;
+    }
+    if (c.maquinas.length) {
+      html += `<div class="compus">${c.maquinas.map(m => compuHtml(m, ahora)).join("")}</div>`;
+    }
+    html += `</div>`;
+  }
+  if (agg.sin_sesion.length) {
+    html += `<h2>Sin sesión</h2><div class="tarjeta"><div class="compus">
+      ${agg.sin_sesion.map(m => compuHtml(m, ahora)).join("")}</div></div>`;
+  }
+  document.getElementById("app").innerHTML = html;
+  document.getElementById("actualizado").textContent =
+    "Actualizado " + new Date().toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" });
+}
+
+async function cargar() {
+  try {
+    const resp = await fetch(`https://api.github.com/gists/${GIST_ID}`,
+      { headers: { Accept: "application/vnd.github+json" } });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    ultimoEstado = JSON.parse((await resp.json()).files["estado.json"].content);
+    pintar(ultimoEstado);
+  } catch (e) {
+    if (ultimoEstado) { pintar(ultimoEstado); }
+    else { document.getElementById("app").textContent = `No se pudo cargar (${e.message}). Reintento en 2 min.`; }
+  }
+}
+
+cargar();
+setInterval(cargar, 120000);
+</script>
+</body>
+</html>
