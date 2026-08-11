@@ -47,9 +47,9 @@ Criterios de éxito:
 
 ## 4. Componentes
 
-### 4.1 Reportero (`reportar.sh`)
+### 4.1 Reportero (`reportar.py`)
 
-Script bash + python3 (sin dependencias externas; ambos presentes en macOS con las herramientas de desarrollo). Instalado en `~/.claude-tablero/reportar.sh`. Cada ejecución:
+Script python3 puro, solo stdlib (presente en macOS con las herramientas de desarrollo; los comandos de sistema como `scutil` y `security` se invocan via subprocess). Instalado en `~/.claude-tablero/reportar.py`. Cada ejecución:
 
 1. **Identidad del compu:** la clave de la entrada es `scutil --get LocalHostName` (estable ante cambios de red, sin espacios; fallback `hostname -s` si viniera vacío). Nunca `hostname` a secas: su sufijo (`.local`/`.lan`) varía según la red y crearía entradas fantasma.
 2. **Cuenta logueada:** lee `~/.claude.json` → `oauthAccount.emailAddress` y `oauthAccount.displayName`. El `displayName` (p. ej. "Gamma") es el **alias público**; el email jamás sale del compu. Si no hay `oauthAccount` (compu deslogueado durante una rotación), publica `cuenta: null` — el mapeo y la última actividad siguen valiendo.
@@ -93,7 +93,7 @@ El cupo es propiedad de la **cuenta**, no del compu: vive en el bloque `cuentas`
 
 - **Lista de cuentas** = claves de `cuentas` ∪ alias no nulos en `maquinas` (no hay lista fija; una cuenta nueva aparece sola y una rotada no desaparece).
 - **Cupo por cuenta** = `cuentas[<alias>]` (último conocido), con frescura dada por su `medido`.
-- **Cuenta recomendada** = la de menor `max(pct_5h, pct_semanal)` entre las que tienen cupo **fresco** (`medido` ≤ 15 min). Empate: menor `pct_5h`. Una cuenta sin cupo medido nunca participa, aunque su reporte sea fresco. **Fallback:** si ninguna tiene cupo fresco, se recomienda sobre el cupo menos viejo, marcado "con dato de hace X"; si ninguna cuenta tiene cupo en absoluto, el banner y la línea `→ Usa:` muestran "sin dato de cupo".
+- **Cuenta recomendada** = la de menor `max(pct_5h, pct_semanal)` entre las que tienen cupo **fresco** (`medido` ≤ 15 min). Empate: menor `pct_5h`. Una cuenta sin cupo medido nunca participa, aunque su reporte sea fresco. **Fallback:** si ninguna tiene cupo fresco, se aplica la misma regla de menor `max(pct)` sobre los últimos cupos conocidos y la elegida se marca "con dato de hace X"; si ninguna cuenta tiene cupo en absoluto, el banner y la línea `→ Usa:` muestran "sin dato de cupo".
 - **Semáforo** (sobre `max(pct_5h, pct_semanal)`): 🟢 < 50 %, 🟡 50–80 %, 🔴 > 80 %.
 - **Frescura:** un compu con `reportado` > 15 min se muestra gris ("sin reporte hace X"). Una cuenta con `medido` > 15 min muestra su cupo atenuado con "dato de hace X".
 - **Compus deslogueados** (`cuenta: null`): se listan en una sección aparte "Sin sesión", con su última actividad y frescura.
@@ -108,7 +108,7 @@ Página estática (HTML/CSS/JS vanilla, un solo archivo) en el repo, servida por
 
 ### 4.5 Comando `cuentas`
 
-Script (bash + python3) que lee el mismo gist por la API y pinta la tabla en la terminal, con las mismas reglas de agregación (§4.3, incluidos los fallbacks) y la línea final `→ Usa: <alias>` (o `→ Sin dato de cupo`). Instalado por el instalador en `/usr/local/bin/cuentas` (fallback `~/.local/bin` si no hay permisos, avisando del PATH).
+Script (python3 puro) que lee el mismo gist por la API y pinta la tabla en la terminal, con las mismas reglas de agregación (§4.3, incluidos los fallbacks) y la línea final `→ Usa: <alias>` (o `→ Sin dato de cupo`). Instalado por el instalador en `/usr/local/bin/cuentas` (fallback `~/.local/bin` si no hay permisos, avisando del PATH).
 
 ### 4.6 Instalador (`instalar.sh`)
 
@@ -118,7 +118,7 @@ Una línea en cualquier compu:
 curl -fsSL https://raw.githubusercontent.com/santiago-prolibu/claude-tablero/main/instalar.sh | bash
 ```
 
-Hace: (1) crea `~/.claude-tablero/`; (2) si no hay token guardado, pide pegar el PAT y lo guarda en `~/.claude-tablero/token` con `chmod 600`; (3) descarga/copia `reportar.sh` y `cuentas`; (4) instala y carga el launchd; (5) dispara el primer reporte (aquí macOS pregunta lo del Keychain → "Permitir siempre"). Idempotente: correrlo de nuevo actualiza los scripts sin pedir el token otra vez.
+Hace: (1) crea `~/.claude-tablero/`; (2) si no hay token guardado, pide pegar el PAT y lo guarda en `~/.claude-tablero/token` con `chmod 600`; (3) descarga/copia `reportar.py` y `cuentas`; (4) instala y carga el launchd; (5) dispara el primer reporte (aquí macOS pregunta lo del Keychain → "Permitir siempre"). Idempotente: correrlo de nuevo actualiza los scripts sin pedir el token otra vez.
 
 Bootstrap único (una sola vez, en el primer compu): crear el PAT fine-grained (permiso: solo Gists) y crear el gist inicial; el ID del gist queda embebido en el repo.
 
@@ -138,7 +138,7 @@ Bootstrap único (una sola vez, en el primer compu): crear el PAT fine-grained (
 | Compu deslogueado (más compus que cuentas) | Reporta `cuenta: null` con su última actividad; las vistas lo muestran en la sección "Sin sesión". |
 | Dos compus en la misma cuenta | El cupo se muestra una vez por cuenta (la medición más fresca actualiza `cuentas[<alias>]`); ambos compus se listan bajo ella. |
 | Cuenta sin ningún compu logueado | Se muestra su último cupo conocido (bloque `cuentas`), atenuado y con fecha del dato. |
-| Ninguna cuenta con cupo fresco (p. ej. todos los Macs dormidos de noche) | Se recomienda sobre el cupo menos viejo, marcado "con dato de hace X"; sin ningún cupo, "sin dato de cupo". |
+| Ninguna cuenta con cupo fresco (p. ej. todos los Macs dormidos de noche) | Se recomienda por menor `max(pct)` sobre los últimos cupos conocidos, marcada "con dato de hace X"; sin ningún cupo, "sin dato de cupo". |
 | Token de Anthropic vencido / endpoint cambia / sin red al medir | No se actualiza `cuentas[<alias>]`; el reporte sigue publicando mapeo y actividad; la vista muestra el último cupo conocido atenuado o "cupo desconocido" si nunca hubo. |
 | Choque de escrituras al gist (dos compus en el mismo segundo) | Última escritura gana y puede pisar una entrada ajena recién puesta; el ciclo siguiente (≤5 min) la restaura. Aceptado por frecuencia baja e impacto trivial. |
 | Falla el PATCH al gist (red, GitHub caído) | El reportero reintenta una vez; si falla, loguea y espera el próximo ciclo. |
