@@ -202,11 +202,12 @@
   </span>
 </header>
 <div id="app"><div class="aviso">Cargando…</div></div>
-<div class="pie"><span id="actualizado">—</span><span>se refresca cada 2 min</span></div>
+<div class="pie"><span id="actualizado">—</span><span>se refresca cada 2 min · <span id="version"></span></span></div>
 <noscript><div class="aviso">Este tablero necesita JavaScript.</div></noscript>
 <script src="agregacion.js"></script>
 <script>
 const GIST_ID = "5b820c7ae6023afbfb862b25b5e4c177"; // mismo valor que reportar.py
+const VERSION = "v8"; // subir en cada cambio de UI — dispara la auto-recarga de pestañas abiertas
 let ultimoEstado = null;
 let ultimoFetchOk = null;
 let primeraPintura = true;
@@ -413,6 +414,18 @@ async function cargar() {
     else { document.getElementById("app").innerHTML = `<div class="aviso">No se pudo cargar (${esc(e.message)}). Reintento en 2 min.</div>`; }
   }
 }
+
+/* auto-actualización: si hay versión nueva publicada, la pestaña se recarga sola */
+document.getElementById("version").textContent = VERSION;
+async function buscarVersionNueva() {
+  try {
+    const resp = await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" });
+    if (!resp.ok) return;
+    const m = (await resp.text()).match(/const VERSION = "([^"]+)"/);
+    if (m && m[1] !== VERSION) location.reload();
+  } catch (e) { /* sin red: se intenta en el próximo ciclo */ }
+}
+setInterval(buscarVersionNueva, 600000);
 
 cargar();
 setInterval(cargar, 120000);
