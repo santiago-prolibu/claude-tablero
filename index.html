@@ -94,14 +94,14 @@
     background: linear-gradient(180deg, var(--grad-a), var(--grad-b));
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
-  .heroe .sub { font-family: "Geist Mono", ui-monospace, monospace; font-size: 12.5px; color: var(--tinta-2); margin-top: 8px; }
+  .heroe .sub { font-family: "Geist Mono", ui-monospace, monospace; font-size: 13.5px; color: var(--tinta-2); margin-top: 8px; }
   .heroe .libres { margin-left: auto; display: flex; flex-direction: column; gap: 12px; width: min(300px, 100%); }
-  .libres .fila { display: flex; justify-content: space-between; font-family: "Geist Mono", ui-monospace, monospace;
-                  font-size: 11px; color: var(--tinta-3); margin-bottom: 6px; font-variant-numeric: tabular-nums; }
-  .libres .fila b { color: var(--tinta); font-weight: 500; }
+  .libres .fila { display: flex; justify-content: space-between; align-items: baseline; font-family: "Geist Mono", ui-monospace, monospace;
+                  font-size: 12.5px; color: var(--tinta-3); margin-bottom: 6px; font-variant-numeric: tabular-nums; }
+  .libres .fila b { color: var(--tinta); font-weight: 600; font-size: 16px; letter-spacing: -.01em; }
 
   /* ─ medidores ─ */
-  .pista { height: 4px; border-radius: 2px; background: var(--pista); overflow: hidden; }
+  .pista { height: 5px; border-radius: 2px; background: var(--pista); overflow: hidden; }
   .relleno { display: block; height: 100%; border-radius: 2px; width: 0;
              background: linear-gradient(90deg, color-mix(in srgb, var(--color-barra, var(--tinta)) 70%, transparent), var(--color-barra, var(--tinta)));
              transition: width .7s cubic-bezier(.2,.8,.2,1); }
@@ -122,11 +122,15 @@
   .filacta.vieja > * { opacity: .55; }
   .cta-id { display: flex; align-items: center; gap: 8px; min-width: 0; }
   .cta-id .punto { width: 7px; height: 7px; border-radius: 50%; flex: none; background: var(--color-barra, var(--gris)); }
-  .cta-id .alias { font-size: 15px; font-weight: 600; letter-spacing: -.02em; }
-  .cta-id .etiq { font-family: "Geist Mono", ui-monospace, monospace; font-size: 10.5px; color: var(--tinta-3); white-space: nowrap; }
-  .medidor .fila { display: flex; justify-content: space-between; gap: 10px; font-family: "Geist Mono", ui-monospace, monospace;
-                   font-size: 11.5px; color: var(--tinta-3); margin-bottom: 6px; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .medidor .fila .uso { color: var(--tinta); flex: none; } /* el % jamás se trunca */
+  .cta-id .alias { font-size: 16.5px; font-weight: 600; letter-spacing: -.02em; }
+  .cta-id .etiq { font-family: "Geist Mono", ui-monospace, monospace; font-size: 11.5px; color: var(--tinta-3); white-space: nowrap; }
+  .medidor .fila { display: flex; justify-content: space-between; align-items: baseline; gap: 10px;
+                   font-family: "Geist Mono", ui-monospace, monospace; font-size: 12.5px; color: var(--tinta-2);
+                   margin-bottom: 6px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .medidor .fila .uso { flex: none; } /* el % jamás se trunca */
+  .medidor .pct { font-size: 16px; font-weight: 600; color: var(--tinta); letter-spacing: -.01em; }
+  .medidor .vent { display: none; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em;
+                   color: var(--tinta-3); margin-right: 7px; }
   .medidor .fila .t-reset { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 
   /* ─ alarmas: agotada parpadea, media carga pulsa suave ─ */
@@ -138,12 +142,12 @@
   .filacta.ojo .punto { animation: pulso 2.4s ease-in-out infinite; }
   .maqs { text-align: right; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
   .maq { min-width: 0; }
-  .maq .host { font-family: "Geist Mono", ui-monospace, monospace; font-size: 12px; color: var(--tinta);
+  .maq .host { font-family: "Geist Mono", ui-monospace, monospace; font-size: 13px; color: var(--tinta);
                overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .maq .det { font-family: "Geist Mono", ui-monospace, monospace; font-size: 11.5px; color: var(--tinta-3); margin-top: 2px;
+  .maq .det { font-family: "Geist Mono", ui-monospace, monospace; font-size: 12.5px; color: var(--tinta-3); margin-top: 2px;
               overflow-wrap: anywhere; }
   .maq.viejo .host { color: var(--tinta-3); }
-  .sindato-txt { font-family: "Geist Mono", ui-monospace, monospace; font-size: 11.5px; color: var(--tinta-3); }
+  .sindato-txt { font-family: "Geist Mono", ui-monospace, monospace; font-size: 12.5px; color: var(--tinta-3); }
 
   /* ─ sin sesión ─ */
   .sinsesion { border: 1px solid var(--borde); border-radius: 12px; background: var(--carta); margin-top: 16px;
@@ -152,7 +156,7 @@
                     font-family: "Geist Mono", ui-monospace, monospace; font-size: 11px; letter-spacing: .05em;
                     text-transform: uppercase; color: var(--tinta-3); }
   .sinsesion .maqfila { display: flex; justify-content: space-between; gap: 12px; padding: 12px 20px;
-                        border-top: 1px solid var(--borde-2); font-family: "Geist Mono", ui-monospace, monospace; font-size: 12px; }
+                        border-top: 1px solid var(--borde-2); font-family: "Geist Mono", ui-monospace, monospace; font-size: 13px; }
   .sinsesion .maqfila:first-of-type { border-top: none; }
   .sinsesion .maqfila span:last-child { color: var(--tinta-3); text-align: right; }
 
@@ -167,6 +171,7 @@
     .filacta { grid-template-columns: 1fr; gap: 12px; padding: 16px 18px; }
     .maqs { text-align: left; }
     .maq .host, .maq .det { white-space: normal; }
+    .medidor .vent { display: inline; }
     .heroe { padding: 20px 18px; }
     .heroe .libres { margin-left: 0; }
     .reloj { display: none; }
@@ -238,7 +243,7 @@ function barra(pct) {
 function medidor(nombre, ventana, viejo) {
   return `<div class="medidor">
     <div class="fila">
-      <span class="uso">${nombre} · ${esc(String(ventana.pct))}%</span>
+      <span class="uso"><span class="vent">${nombre}</span><b class="pct">${esc(String(ventana.pct))}%</b></span>
       <span class="t-reset" data-reset="${esc(String(ventana.resetea || ""))}" data-viejo="${viejo ? 1 : 0}"></span>
     </div>
     ${barra(ventana.pct)}
