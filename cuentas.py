@@ -5,7 +5,7 @@ import sys
 import urllib.request
 from datetime import datetime, timezone
 
-GIST_ID = "PENDIENTE_BOOTSTRAP"  # mismo valor que reportar.py (Task 3)
+GIST_ID = "5b820c7ae6023afbfb862b25b5e4c177"  # mismo valor que reportar.py (Task 3)
 GIST_FILE = "estado.json"
 FRESCO_S = 900
 

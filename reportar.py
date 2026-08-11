@@ -9,7 +9,7 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
-GIST_ID = "PENDIENTE_BOOTSTRAP"
+GIST_ID = "5b820c7ae6023afbfb862b25b5e4c177"
 GIST_FILE = "estado.json"
 ANTHROPIC_USAGE_URL = "https://api.anthropic.com/api/oauth/usage"
 TABLERO_DIR = Path.home() / ".claude-tablero"
