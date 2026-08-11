@@ -150,6 +150,8 @@
   .filacta.alerta .etiq { color: var(--rojo); font-weight: 500; }
   .filacta.alerta .relleno { animation: alarma 1.6s ease-in-out infinite; }
   .filacta.ojo .punto { animation: pulso 2.4s ease-in-out infinite; }
+  .filacta.aviso .etiq { color: var(--rojo); font-weight: 500; }
+  .filacta.aviso .punto { animation: pulso 1.4s ease-in-out infinite; }
   .maqs { text-align: right; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
   .maq { min-width: 0; }
   .maq .host { font-family: "Geist Mono", ui-monospace, monospace; font-size: 13px; color: var(--tinta);
@@ -207,7 +209,7 @@
 <script src="agregacion.js"></script>
 <script>
 const GIST_ID = "5b820c7ae6023afbfb862b25b5e4c177"; // mismo valor que reportar.py
-const VERSION = "v8"; // subir en cada cambio de UI — dispara la auto-recarga de pestañas abiertas
+const VERSION = "v9"; // subir en cada cambio de UI — dispara la auto-recarga de pestañas abiertas
 let ultimoEstado = null;
 let ultimoFetchOk = null;
 let primeraPintura = true;
@@ -270,7 +272,8 @@ function barra(pct) {
 }
 
 function medidor(nombre, ventana, viejo) {
-  return `<div class="medidor">
+  const critico = Number(ventana.pct) > 80;
+  return `<div class="medidor"${critico ? ' style="--color-cuenta:var(--rojo)"' : ""}>
     <div class="fila">
       <span class="uso"><span class="vent">${nombre}</span><b class="pct">${esc(String(ventana.pct))}%</b></span>
       <span class="t-reset" data-reset="${esc(String(ventana.resetea || ""))}" data-viejo="${viejo ? 1 : 0}"></span>
@@ -324,11 +327,13 @@ function pintar(estado) {
     <div class="thead"><span>Cuenta</span><span>5 horas</span><span>Semana</span><span>Máquinas</span></div>`;
   agg.cuentas.forEach((c, i) => {
     const vieja = c.cupo && !c.fresco;
+    const agotada = c.semaforo === "rojo" && c.score >= 99;
+    const nombreEstado = c.cupo ? (agotada ? "agotada" : (c.semaforo === "rojo" ? "por agotarse" : ETIQUETA[c.semaforo])) : null;
     const etiq = c.cupo
-      ? `${ETIQUETA[c.semaforo]}${vieja ? ` · dato de <span class="t-hace" data-ts="${esc(String(c.medido))}"></span>` : ""}`
+      ? `${nombreEstado}${vieja ? ` · dato de <span class="t-hace" data-ts="${esc(String(c.medido))}"></span>` : ""}`
       : "cupo desconocido";
     const maqs = c.maquinas.length ? c.maquinas.map(maqHtml).join("") : `<div class="maq"><div class="det">—</div></div>`;
-    const alarma = c.semaforo === "rojo" ? "alerta" : (c.semaforo === "amarillo" ? "ojo" : (c.semaforo === "verde" ? "ok" : ""));
+    const alarma = agotada ? "alerta" : (c.semaforo === "rojo" ? "aviso" : (c.semaforo === "amarillo" ? "ojo" : (c.semaforo === "verde" ? "ok" : "")));
     html += `<div class="filacta ${vieja ? "vieja" : ""} ${alarma}" style="--color-cuenta:${colores[c.alias]};animation-delay:${.1 + i * .06}s">
       <div class="cta-id"><span class="punto"></span><span style="min-width:0">
         <span class="alias">${esc(c.alias)}</span><br><span class="etiq">${etiq}</span></span></div>
