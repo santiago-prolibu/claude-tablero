@@ -17,7 +17,7 @@
 - Nombres exactos: gist file `estado.json`; label launchd `com.prolibu.claude-tablero`; dir instalado `~/.claude-tablero/`; comando `cuentas`; constante `GIST_ID` (placeholder `PENDIENTE_BOOTSTRAP` hasta el Task 3).
 - Reglas compartidas (idénticas en Python y JS): frescura = 900 s; semáforo sobre `score = max(pct_5h, pct_semanal)`: `<50` verde, `<=80` amarillo, `>80` rojo; recomendada = menor `(score, pct_5h)` entre las frescas con cupo, fallback a las no-frescas con cupo (marcada con la edad del dato), `null` si ninguna tiene cupo.
 - Timestamps en ISO-8601 UTC con sufijo `Z` (`%Y-%m-%dT%H:%M:%SZ`); las funciones puras reciben `ahora` como parámetro (nunca llaman al reloj adentro).
-- Tests: `python3 -m unittest discover -s tests -v` y `node --test tests/`.
+- Tests: `python3 -m unittest discover -s tests -v` y `node --test` (sin pasar el directorio como argumento: en Node 22 `node --test tests/` puede fallar con MODULE_NOT_FOUND).
 - Textos de UI en español.
 - Repo público `santiago-prolibu/claude-tablero`; Pages desde `main` / root.
 - Este repo es nuevo y exclusivo del proyecto: se trabaja directo en `main`, sin worktree.
@@ -975,7 +975,7 @@ test("humanizar", () => {
 });
 ```
 
-Run: `node --test tests/` → FAIL (no existe `agregacion.js`).
+Run: `node --test` → FAIL (no existe `agregacion.js`).
 
 - [ ] **Paso 2: Implementar `agregacion.js`**
 
@@ -1034,7 +1034,8 @@ function agregar(estado, ahora) {
   lista.sort((a, b) =>
     (a.cupo === null) - (b.cupo === null) ||
     (a.score ?? 999) - (b.score ?? 999) ||
-    a.alias.localeCompare(b.alias));
+    // ordinal por codepoint — localeCompare divergiría del orden de Python
+    (a.alias > b.alias) - (a.alias < b.alias));
 
   const sin_sesion = claves.filter(k => !maquinas[k].cuenta).map(k => maquina(k, maquinas[k]));
   return { recomendada, cuentas: lista, sin_sesion };
@@ -1052,7 +1053,7 @@ if (typeof module !== "undefined") module.exports = { agregar, humanizar, FRESCO
 
 - [ ] **Paso 3: Verificar que pasan**
 
-Run: `node --test tests/` → todos PASS. Y `python3 -m unittest discover -s tests -v` sigue `OK`.
+Run: `node --test` → todos PASS. Y `python3 -m unittest discover -s tests -v` sigue `OK`.
 
 - [ ] **Paso 4: Commit y push**
 
