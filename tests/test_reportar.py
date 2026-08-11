@@ -100,5 +100,22 @@ class TestFusionar(unittest.TestCase):
         self.assertEqual(estado.get("cuentas", {}), {})
 
 
+class TestParsearCupo(unittest.TestCase):
+    def _fixture(self):
+        p = Path(__file__).parent / "fixtures" / "uso_real.json"
+        return json.loads(p.read_text())
+
+    def test_fixture_real(self):
+        cupo = reportar.parsear_cupo(self._fixture())
+        for ventana in ("cinco_horas", "semanal"):
+            self.assertIn(ventana, cupo)
+            self.assertIsInstance(cupo[ventana]["pct"], int)
+            self.assertTrue(0 <= cupo[ventana]["pct"] <= 100)
+
+    def test_respuesta_rara_devuelve_none(self):
+        self.assertIsNone(reportar.parsear_cupo({}))
+        self.assertIsNone(reportar.parsear_cupo({"error": "x"}))
+
+
 if __name__ == "__main__":
     unittest.main()

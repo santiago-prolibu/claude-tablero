@@ -66,3 +66,51 @@ def fusionar(estado, clave, cuenta, actividad, cupo, ahora):
         cuentas[cuenta] = {**cupo, "medido": ahora, "por": clave}
     estado["cuentas"] = cuentas
     return estado
+
+
+def leer_token_anthropic():
+    try:
+        r = subprocess.run(
+            ["security", "find-generic-password", "-s", "Claude Code-credentials", "-w"],
+            capture_output=True, text=True, timeout=15)
+        if r.returncode != 0:
+            return None
+        return (json.loads(r.stdout.strip()).get("claudeAiOauth") or {}).get("accessToken")
+    except Exception:
+        return None
+
+
+def consultar_uso(token):
+    req = urllib.request.Request(ANTHROPIC_USAGE_URL, headers={
+        "Authorization": f"Bearer {token}",
+        "anthropic-beta": "oauth-2025-04-20",
+        "User-Agent": "claude-tablero",
+    })
+    with urllib.request.urlopen(req, timeout=20) as resp:
+        return json.load(resp)
+
+
+def parsear_cupo(uso):
+    try:
+        fh, sd = uso["five_hour"], uso["seven_day"]
+
+        # fixture real observado (tests/fixtures/uso_real.json): utilization ya viene en 0-100, no en fracción 0-1.
+        def pct(ventana):
+            return round(float(ventana["utilization"]))
+
+        return {
+            "cinco_horas": {"pct": pct(fh), "resetea": fh.get("resets_at")},
+            "semanal": {"pct": pct(sd), "resetea": sd.get("resets_at")},
+        }
+    except (KeyError, TypeError, ValueError):
+        return None
+
+
+if __name__ == "__main__":
+    if "--probe" in sys.argv:
+        tok = leer_token_anthropic()
+        if not tok:
+            print("sin token (Keychain denegado o vacío)", file=sys.stderr)
+            sys.exit(1)
+        print(json.dumps(consultar_uso(tok), indent=2))
+        sys.exit(0)
