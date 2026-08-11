@@ -52,7 +52,7 @@ function agregar(estado, ahora) {
   lista.sort((a, b) =>
     (a.cupo === null) - (b.cupo === null) ||
     (a.score ?? 999) - (b.score ?? 999) ||
-    a.alias.localeCompare(b.alias));
+    (a.alias > b.alias) - (a.alias < b.alias));
 
   const sin_sesion = claves.filter(k => !maquinas[k].cuenta).map(k => maquina(k, maquinas[k]));
   return { recomendada, cuentas: lista, sin_sesion };

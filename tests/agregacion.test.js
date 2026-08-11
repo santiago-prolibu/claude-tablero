@@ -73,3 +73,20 @@ test("humanizar", () => {
   assert.equal(humanizar(3600 * 3 + 100), "hace 3 h");
   assert.equal(humanizar(86400 * 2 + 100), "hace 2 d");
 });
+
+test("orden por codepoint con mayúsculas y tildes", () => {
+  const ahora = "2026-08-11T18:00:00Z";
+  const estado = {
+    version: 1,
+    maquinas: {},
+    cuentas: {
+      delta: { cinco_horas: { pct: 50, resetea: "2026-08-11T19:00:00Z" }, semanal: { pct: 40, resetea: "2026-08-12T10:00:00Z" }, medido: "2026-08-11T17:59:00Z", por: undefined },
+      Gamma: { cinco_horas: { pct: 50, resetea: "2026-08-11T19:00:00Z" }, semanal: { pct: 40, resetea: "2026-08-12T10:00:00Z" }, medido: "2026-08-11T17:59:00Z", por: undefined },
+      Ángela: { cinco_horas: { pct: 50, resetea: "2026-08-11T19:00:00Z" }, semanal: { pct: 40, resetea: "2026-08-12T10:00:00Z" }, medido: "2026-08-11T17:59:00Z", por: undefined },
+      zulu: { cinco_horas: { pct: 50, resetea: "2026-08-11T19:00:00Z" }, semanal: { pct: 40, resetea: "2026-08-12T10:00:00Z" }, medido: "2026-08-11T17:59:00Z", por: undefined },
+    },
+  };
+  const agg = agregar(estado, ahora);
+  const orden = agg.cuentas.map(c => c.alias);
+  assert.deepEqual(orden, ["Gamma", "delta", "zulu", "Ángela"]);
+});
