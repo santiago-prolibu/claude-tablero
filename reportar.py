@@ -106,6 +106,98 @@ def parsear_cupo(uso):
         return None
 
 
+def armar_reporte(claude_json, projects_dir, local_hostname, hostname_s, uso, ahora):
+    clave = elegir_clave(local_hostname, hostname_s)
+    cuenta = leer_cuenta(claude_json)
+    actividad = ultima_actividad(projects_dir)
+    cupo = parsear_cupo(uso) if (uso and cuenta) else None
+    return clave, cuenta, actividad, cupo
+
+
+def _gh_headers(pat=None):
+    h = {"Accept": "application/vnd.github+json", "User-Agent": "claude-tablero"}
+    if pat:
+        h["Authorization"] = f"Bearer {pat}"
+    return h
+
+
+def gist_get(pat=None):
+    req = urllib.request.Request(
+        f"https://api.github.com/gists/{GIST_ID}", headers=_gh_headers(pat))
+    with urllib.request.urlopen(req, timeout=20) as resp:
+        cuerpo = json.load(resp)
+    try:
+        return json.loads(cuerpo["files"][GIST_FILE]["content"])
+    except (KeyError, json.JSONDecodeError):
+        return {}
+
+
+def gist_patch(pat, estado):
+    datos = json.dumps({"files": {GIST_FILE: {
+        "content": json.dumps(estado, indent=1, ensure_ascii=False)}}}).encode()
+    req = urllib.request.Request(
+        f"https://api.github.com/gists/{GIST_ID}", data=datos,
+        headers=_gh_headers(pat), method="PATCH")
+    with urllib.request.urlopen(req, timeout=20) as resp:
+        resp.read()
+
+
+def _log(msg):
+    try:
+        TABLERO_DIR.mkdir(exist_ok=True)
+        if LOG_PATH.exists() and LOG_PATH.stat().st_size > 200_000:
+            LOG_PATH.write_text("\n".join(LOG_PATH.read_text().splitlines()[-50:]) + "\n")
+        with open(LOG_PATH, "a") as fh:
+            fh.write(f"{datetime.now(timezone.utc).strftime(ISO)} {msg}\n")
+    except OSError:
+        pass
+
+
+def _scutil_localhostname():
+    try:
+        r = subprocess.run(["scutil", "--get", "LocalHostName"],
+                           capture_output=True, text=True, timeout=10)
+        return r.stdout.strip() if r.returncode == 0 else None
+    except Exception:
+        return None
+
+
+def main(dry_run=False):
+    try:
+        claude_json = json.loads((Path.home() / ".claude.json").read_text())
+    except (OSError, json.JSONDecodeError):
+        claude_json = {}
+    hostname_s = subprocess.run(["hostname", "-s"], capture_output=True,
+                                text=True).stdout.strip() or "desconocido"
+    tok = leer_token_anthropic()
+    uso = None
+    if tok:
+        try:
+            uso = consultar_uso(tok)
+        except Exception as e:
+            _log(f"uso fallo: {e}")
+    ahora = datetime.now(timezone.utc).strftime(ISO)
+    clave, cuenta, actividad, cupo = armar_reporte(
+        claude_json, Path.home() / ".claude" / "projects",
+        _scutil_localhostname(), hostname_s, uso, ahora)
+    pat = TOKEN_PATH.read_text().strip() if TOKEN_PATH.exists() else None
+    if not pat:
+        _log("sin PAT; abortando")
+        sys.exit(1)
+    for intento in (1, 2):
+        try:
+            estado = fusionar(gist_get(pat), clave, cuenta, actividad, cupo, ahora)
+            if dry_run:
+                print(json.dumps(estado, indent=2, ensure_ascii=False))
+                return
+            gist_patch(pat, estado)
+            _log(f"ok {clave} cuenta={cuenta} cupo={'si' if cupo else 'no'}")
+            return
+        except Exception as e:
+            _log(f"intento {intento} fallo: {e}")
+    sys.exit(1)
+
+
 if __name__ == "__main__":
     if "--probe" in sys.argv:
         tok = leer_token_anthropic()
@@ -113,4 +205,5 @@ if __name__ == "__main__":
             print("sin token (Keychain denegado o vacío)", file=sys.stderr)
             sys.exit(1)
         print(json.dumps(consultar_uso(tok), indent=2))
-        sys.exit(0)
+    else:
+        main(dry_run="--dry-run" in sys.argv)

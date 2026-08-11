@@ -117,5 +117,26 @@ class TestParsearCupo(unittest.TestCase):
         self.assertIsNone(reportar.parsear_cupo({"error": "x"}))
 
 
+class TestArmarReporte(unittest.TestCase):
+    def test_integra_colectores_sin_tocar_red(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            cj = {"oauthAccount": {"displayName": "Gamma"}}
+            uso = json.loads((Path(__file__).parent / "fixtures" / "uso_real.json").read_text())
+            clave, cuenta, actividad, cupo = reportar.armar_reporte(
+                cj, tmp, "Mini", "mini", uso, "2026-08-11T18:00:00Z")
+            self.assertEqual(clave, "Mini")
+            self.assertEqual(cuenta, "Gamma")
+            self.assertIsNone(actividad)
+            self.assertIsInstance(cupo["cinco_horas"]["pct"], int)
+
+    def test_deslogueado_y_sin_uso(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            clave, cuenta, actividad, cupo = reportar.armar_reporte(
+                {}, tmp, None, "mini", None, "2026-08-11T18:00:00Z")
+            self.assertEqual(clave, "mini")
+            self.assertIsNone(cuenta)
+            self.assertIsNone(cupo)
+
+
 if __name__ == "__main__":
     unittest.main()
