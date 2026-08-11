@@ -21,6 +21,8 @@
     --verde: #0ca750; --amarillo: #d28a00; --rojo: #dc2b2b; --gris: #a1a1a1;
     --grad-a: #171717; --grad-b: #6e6e6e;
     --hover: #fafafa;
+    --cat1: #2a78d6; --cat2: #eb6834; --cat3: #1baf7a; --cat4: #eda100;
+    --cat5: #e87ba4; --cat6: #008300; --cat7: #4a3aa7; --cat8: #e34948;
   }
   :root[data-theme="dark"] { color-scheme: dark;
     --plano: #0a0a0a; --carta: #111111; --carta-2: #0a0a0a;
@@ -30,6 +32,8 @@
     --verde: #2fbf68; --amarillo: #f5a623; --rojo: #ff5c5c; --gris: #7a7a7a;
     --grad-a: #ffffff; --grad-b: #8f8f8f;
     --hover: #161616;
+    --cat1: #3987e5; --cat2: #d95926; --cat3: #199e70; --cat4: #c98500;
+    --cat5: #d55181; --cat6: #008300; --cat7: #9085e9; --cat8: #e66767;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) { color-scheme: dark;
@@ -40,6 +44,8 @@
       --verde: #2fbf68; --amarillo: #f5a623; --rojo: #ff5c5c; --gris: #7a7a7a;
       --grad-a: #ffffff; --grad-b: #8f8f8f;
       --hover: #161616;
+      --cat1: #3987e5; --cat2: #d95926; --cat3: #199e70; --cat4: #c98500;
+      --cat5: #d55181; --cat6: #008300; --cat7: #9085e9; --cat8: #e66767;
     }
   }
   * { box-sizing: border-box; margin: 0; }
@@ -103,14 +109,14 @@
   /* ─ medidores ─ */
   .pista { height: 5px; border-radius: 2px; background: var(--pista); overflow: hidden; }
   .relleno { display: block; height: 100%; border-radius: 2px; width: 0;
-             background: linear-gradient(90deg, color-mix(in srgb, var(--color-barra, var(--tinta)) 70%, transparent), var(--color-barra, var(--tinta)));
+             background: linear-gradient(90deg, color-mix(in srgb, var(--color-cuenta, var(--tinta)) 70%, transparent), var(--color-cuenta, var(--tinta)));
              transition: width .7s cubic-bezier(.2,.8,.2,1); }
-  @supports not (background: color-mix(in srgb, red 50%, blue)) { .relleno { background: var(--color-barra, var(--tinta)); } }
+  @supports not (background: color-mix(in srgb, red 50%, blue)) { .relleno { background: var(--color-cuenta, var(--tinta)); } }
 
   /* ─ tabla de cuentas ─ */
   .tabla { border: 1px solid var(--borde); border-radius: 12px; background: var(--carta);
            margin-top: 16px; overflow: hidden; animation: entra .45s ease-out .07s both; }
-  .thead, .filacta { display: grid; grid-template-columns: 130px 1fr 1fr minmax(200px, 280px); gap: 18px; align-items: center; padding: 14px 20px; }
+  .thead, .filacta { display: grid; grid-template-columns: 150px 1fr 1fr minmax(200px, 280px); gap: 18px; align-items: center; padding: 14px 20px; }
   .thead > *, .filacta > * { min-width: 0; }
   .thead { padding: 10px 20px; background: var(--carta-2); border-bottom: 1px solid var(--borde);
            font-family: "Geist Mono", ui-monospace, monospace; font-size: 11px; letter-spacing: .05em;
@@ -121,9 +127,11 @@
   .filacta:hover { background: var(--hover); }
   .filacta.vieja > * { opacity: .55; }
   .cta-id { display: flex; align-items: center; gap: 8px; min-width: 0; }
-  .cta-id .punto { width: 7px; height: 7px; border-radius: 50%; flex: none; background: var(--color-barra, var(--gris)); }
+  .cta-id .punto { width: 8px; height: 8px; border-radius: 50%; flex: none; background: var(--color-cuenta, var(--gris)); }
   .cta-id .alias { font-size: 16.5px; font-weight: 600; letter-spacing: -.02em; }
-  .cta-id .etiq { font-family: "Geist Mono", ui-monospace, monospace; font-size: 11.5px; color: var(--tinta-3); white-space: nowrap; }
+  .cta-id .etiq { font-family: "Geist Mono", ui-monospace, monospace; font-size: 11.5px; color: var(--tinta-3); white-space: normal; overflow-wrap: anywhere; line-height: 1.5; }
+  .filacta.ok .etiq { color: var(--verde); }
+  .filacta.ojo .etiq { color: var(--amarillo); }
   .medidor .fila { display: flex; justify-content: space-between; align-items: baseline; gap: 10px;
                    font-family: "Geist Mono", ui-monospace, monospace; font-size: 12.5px; color: var(--tinta-2);
                    margin-bottom: 6px; font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -135,6 +143,8 @@
 
   /* ─ alarmas: agotada parpadea, media carga pulsa suave ─ */
   @keyframes alarma { 0%, 100% { opacity: 1 } 50% { opacity: .25 } }
+  .filacta.alerta, .filacta.alerta:hover { background: color-mix(in srgb, var(--rojo) 8%, transparent); }
+  @supports not (background: color-mix(in srgb, red 50%, blue)) { .filacta.alerta, .filacta.alerta:hover { background: rgba(220,43,43,.08); } }
   .filacta.alerta .punto { animation: alarma 1.1s ease-in-out infinite;
                            box-shadow: 0 0 0 4px color-mix(in srgb, var(--rojo) 18%, transparent); }
   .filacta.alerta .etiq { color: var(--rojo); font-weight: 500; }
@@ -208,6 +218,24 @@ function esc(s) {
 const ETIQUETA = { verde: "libre", amarillo: "a media carga", rojo: "agotada" };
 const COLOR = { verde: "var(--verde)", amarillo: "var(--amarillo)", rojo: "var(--rojo)" };
 
+/* identidad: color único y estable por cuenta (hash del alias → slot de la paleta) */
+const CATS = 8;
+function hashAlias(a) {
+  let h = 5381;
+  for (const ch of String(a)) h = ((h * 33) ^ ch.codePointAt(0)) >>> 0;
+  return h;
+}
+function mapaColores(aliases) {
+  const usado = {}, mapa = {};
+  for (const a of [...aliases].sort()) {
+    let s = hashAlias(a) % CATS;
+    while (usado[s]) s = (s + 1) % CATS;
+    usado[s] = 1;
+    mapa[a] = `var(--cat${s + 1})`;
+  }
+  return mapa;
+}
+
 /* ─ tema: sistema por defecto, toggle manual persistido ─ */
 (function () {
   const guardado = localStorage.getItem("tema");
@@ -264,6 +292,7 @@ function maqHtml(m) {
 function pintar(estado) {
   const ahoraMs = Date.now();
   const agg = agregar(estado, new Date(ahoraMs).toISOString());
+  const colores = mapaColores(agg.cuentas.map(c => c.alias));
   let html = "";
 
   /* héroe */
@@ -283,7 +312,7 @@ function pintar(estado) {
         <div><div class="fila"><span>5 h libre</span><b>${esc(String(100 - c.cupo.cinco_horas.pct))}%</b></div>${barra(100 - c.cupo.cinco_horas.pct)}</div>
         <div><div class="fila"><span>semana libre</span><b>${esc(String(100 - c.cupo.semanal.pct))}%</b></div>${barra(100 - c.cupo.semanal.pct)}</div>
       </div>` : "";
-    html += `<div class="heroe" style="--glow:${glow}"><div style="min-width:0">
+    html += `<div class="heroe" style="--glow:${glow};--color-cuenta:${colores[r.alias] || "var(--tinta)"}"><div style="min-width:0">
       <div class="miga">→ Usa</div>
       <div class="alias-grande">${esc(r.alias)}</div>
       <div class="sub">${sub}</div></div>${libres}</div>`;
@@ -294,13 +323,12 @@ function pintar(estado) {
     <div class="thead"><span>Cuenta</span><span>5 horas</span><span>Semana</span><span>Máquinas</span></div>`;
   agg.cuentas.forEach((c, i) => {
     const vieja = c.cupo && !c.fresco;
-    const color = c.semaforo ? COLOR[c.semaforo] : "var(--gris)";
     const etiq = c.cupo
       ? `${ETIQUETA[c.semaforo]}${vieja ? ` · dato de <span class="t-hace" data-ts="${esc(String(c.medido))}"></span>` : ""}`
       : "cupo desconocido";
     const maqs = c.maquinas.length ? c.maquinas.map(maqHtml).join("") : `<div class="maq"><div class="det">—</div></div>`;
-    const alarma = c.semaforo === "rojo" ? "alerta" : (c.semaforo === "amarillo" ? "ojo" : "");
-    html += `<div class="filacta ${vieja ? "vieja" : ""} ${alarma}" style="--color-barra:${color};animation-delay:${.1 + i * .06}s">
+    const alarma = c.semaforo === "rojo" ? "alerta" : (c.semaforo === "amarillo" ? "ojo" : (c.semaforo === "verde" ? "ok" : ""));
+    html += `<div class="filacta ${vieja ? "vieja" : ""} ${alarma}" style="--color-cuenta:${colores[c.alias]};animation-delay:${.1 + i * .06}s">
       <div class="cta-id"><span class="punto"></span><span style="min-width:0">
         <span class="alias">${esc(c.alias)}</span><br><span class="etiq">${etiq}</span></span></div>
       ${c.cupo ? medidor("5 h", c.cupo.cinco_horas, vieja) : `<div class="sindato-txt">sin medición — se llena cuando un compu entre a esta cuenta</div>`}
