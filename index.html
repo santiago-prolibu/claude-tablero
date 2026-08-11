@@ -3,119 +3,165 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#f9f9f7" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0d0d0d" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-title" content="Cuentas">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b0b0b'/%3E%3Crect x='6' y='9' width='20' height='4' rx='2' fill='%230ca30c'/%3E%3Crect x='6' y='16' width='13' height='4' rx='2' fill='%23fab219'/%3E%3Crect x='6' y='23' width='7' height='4' rx='2' fill='%23d03b3b'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b0b0b'/%3E%3Crect x='6' y='9' width='20' height='4' rx='2' fill='%230ca750'/%3E%3Crect x='6' y='16' width='13' height='4' rx='2' fill='%23d28a00'/%3E%3Crect x='6' y='23' width='7' height='4' rx='2' fill='%23dc2b2b'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <title>Cuentas Claude</title>
 <style>
   :root {
     color-scheme: light;
-    --plano: #f9f9f7;          /* página */
-    --superficie: #fcfcfb;     /* tarjetas */
-    --tinta: #0b0b0b;
-    --tinta-2: #52514e;
-    --tinta-3: #898781;
-    --pista: #e1e0d9;          /* riel de los medidores */
-    --borde: rgba(11,11,11,.10);
-    --bien: #0ca30c;           /* semáforo: libre */
-    --ojo: #fab219;            /* semáforo: a media carga */
-    --tope: #d03b3b;           /* semáforo: agotada */
-    --sombra: 0 1px 2px rgba(11,11,11,.05), 0 4px 16px rgba(11,11,11,.05);
+    --plano: #fafafa; --carta: #ffffff; --carta-2: #fafafa;
+    --borde: #eaeaea; --borde-2: #f0f0f0;
+    --tinta: #171717; --tinta-2: #666666; --tinta-3: #8f8f8f;
+    --pista: #eaeaea;
+    --verde: #0ca750; --amarillo: #d28a00; --rojo: #dc2b2b; --gris: #a1a1a1;
+    --grad-a: #171717; --grad-b: #6e6e6e;
+    --hover: #fafafa;
+  }
+  :root[data-theme="dark"] { color-scheme: dark;
+    --plano: #0a0a0a; --carta: #111111; --carta-2: #0a0a0a;
+    --borde: #262626; --borde-2: #1f1f1f;
+    --tinta: #ededed; --tinta-2: #a1a1a1; --tinta-3: #7a7a7a;
+    --pista: #262626;
+    --verde: #2fbf68; --amarillo: #f5a623; --rojo: #ff5c5c; --gris: #7a7a7a;
+    --grad-a: #ffffff; --grad-b: #8f8f8f;
+    --hover: #161616;
   }
   @media (prefers-color-scheme: dark) {
-    :root {
-      color-scheme: dark;
-      --plano: #0d0d0d;
-      --superficie: #1a1a19;
-      --tinta: #ffffff;
-      --tinta-2: #c3c2b7;
-      --tinta-3: #898781;
-      --pista: #2c2c2a;
-      --borde: rgba(255,255,255,.10);
-      --sombra: none;
+    :root:not([data-theme="light"]) { color-scheme: dark;
+      --plano: #0a0a0a; --carta: #111111; --carta-2: #0a0a0a;
+      --borde: #262626; --borde-2: #1f1f1f;
+      --tinta: #ededed; --tinta-2: #a1a1a1; --tinta-3: #7a7a7a;
+      --pista: #262626;
+      --verde: #2fbf68; --amarillo: #f5a623; --rojo: #ff5c5c; --gris: #7a7a7a;
+      --grad-a: #ffffff; --grad-b: #8f8f8f;
+      --hover: #161616;
     }
   }
   * { box-sizing: border-box; margin: 0; }
   html { -webkit-text-size-adjust: 100%; }
   body {
     background: var(--plano); color: var(--tinta);
-    font: 16px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
-    padding: 20px 16px calc(28px + env(safe-area-inset-bottom));
-    max-width: 560px; margin: 0 auto;
+    font: 15px/1.5 Geist, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: 28px 18px calc(48px + env(safe-area-inset-bottom));
+    max-width: 960px; margin: 0 auto;
+    transition: background .25s ease, color .25s ease;
   }
-  .mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-variant-numeric: tabular-nums; }
+  .mono { font-family: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace; font-variant-numeric: tabular-nums; }
 
-  /* cabecera */
-  header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
-  header h1 { font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--tinta-2); }
-  .vivo { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--tinta-3); }
-  .vivo .punto { width: 7px; height: 7px; border-radius: 50%; background: var(--bien); animation: latido 2.4s ease-in-out infinite; }
-  .vivo.caido .punto { background: var(--tinta-3); animation: none; }
-  @keyframes latido { 0%,100% { opacity: 1 } 50% { opacity: .35 } }
-
-  /* héroe: la respuesta */
-  .heroe {
-    background: var(--superficie); border: 1px solid var(--borde); border-radius: 16px;
-    box-shadow: var(--sombra); padding: 18px 18px 16px; margin-bottom: 14px;
-    animation: entra .4s ease-out both;
-  }
-  .heroe .miga { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--tinta-3); margin-bottom: 2px; }
-  .heroe .alias { font-size: 40px; font-weight: 750; letter-spacing: -.02em; line-height: 1.1; }
-  .heroe .datoviejo { font-size: 13px; color: var(--tinta-2); margin-top: 2px; }
-  .heroe .cifras { display: flex; gap: 18px; margin-top: 10px; font-size: 13px; color: var(--tinta-2); flex-wrap: wrap; }
-  .heroe .cifras b { color: var(--tinta); font-weight: 650; }
-  .heroe.sindato .alias { font-size: 22px; color: var(--tinta-2); font-weight: 600; }
-
-  /* tarjetas de cuenta */
-  .tarjeta {
-    background: var(--superficie); border: 1px solid var(--borde); border-radius: 16px;
-    box-shadow: var(--sombra); padding: 14px 16px; margin-bottom: 10px;
-    animation: entra .4s ease-out both;
-  }
-  .tarjeta:nth-of-type(2) { animation-delay: .05s } .tarjeta:nth-of-type(3) { animation-delay: .1s }
-  .tarjeta:nth-of-type(4) { animation-delay: .15s } .tarjeta:nth-of-type(5) { animation-delay: .2s }
-  @keyframes entra { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: none } }
-  .tarjeta.vieja { opacity: .6; }
-  .cabecera { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
-  .cabecera .alias { font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
-  .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--tinta-2);
-          border: 1px solid var(--borde); border-radius: 999px; padding: 3px 10px; white-space: nowrap; }
-  .chip .punto { width: 8px; height: 8px; border-radius: 50%; flex: none; }
-  .chip.verde .punto { background: var(--bien) } .chip.amarillo .punto { background: var(--ojo) }
-  .chip.rojo .punto { background: var(--tope) } .chip.gris .punto { background: var(--tinta-3) }
-
-  /* medidores */
-  .medidor { margin: 9px 0 2px; }
-  .medidor .fila { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; margin-bottom: 4px; }
-  .medidor .nombre { color: var(--tinta-2); }
-  .medidor .pct { font-size: 13px; color: var(--tinta); }
-  .medidor .reset { font-size: 12px; color: var(--tinta-3); }
-  .pista { background: var(--pista); border-radius: 4px; height: 6px; overflow: hidden; }
-  .relleno { height: 100%; border-radius: 4px; width: 0; transition: width .6s cubic-bezier(.2,.8,.2,1); }
-  .verde .relleno { background: var(--bien) } .amarillo .relleno { background: var(--ojo) } .rojo .relleno { background: var(--tope) }
-  .desconocido { font-size: 13px; color: var(--tinta-3); padding: 6px 0 2px; }
-
-  /* compus */
-  .compus { margin-top: 10px; border-top: 1px solid var(--borde); padding-top: 8px; }
-  .compu { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 3px 0; font-size: 13px; }
-  .compu .clave { font-size: 12.5px; }
-  .compu .detalle { color: var(--tinta-2); text-align: right; }
-  .compu.viejo, .compu.viejo .detalle { color: var(--tinta-3); }
-
-  h2 { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--tinta-3); margin: 18px 0 8px 4px; font-weight: 600; }
-
-  /* pie */
-  .pie { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; color: var(--tinta-3); font-size: 12.5px; }
+  /* ─ cabecera ─ */
+  header { display: flex; align-items: center; gap: 12px; padding-bottom: 20px; flex-wrap: wrap; }
+  header h1 { font-size: 13px; font-weight: 600; letter-spacing: -.01em; }
+  .vivo { display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 9px;
+          border: 1px solid var(--borde); border-radius: 999px; background: var(--carta);
+          font-family: "Geist Mono", ui-monospace, monospace; font-size: 11px; color: var(--tinta-2); }
+  .vivo .punto { width: 6px; height: 6px; border-radius: 50%; background: var(--verde); animation: pulso 2.4s ease-in-out infinite; }
+  .vivo.caido .punto { background: var(--gris); animation: none; }
+  @keyframes pulso { 0%,100% { opacity: 1 } 50% { opacity: .3 } }
+  .reloj { margin-left: auto; font-size: 12px; color: var(--tinta-3); }
+  .acciones { display: flex; gap: 8px; }
   button {
-    background: var(--superficie); border: 1px solid var(--borde); color: var(--tinta);
-    border-radius: 999px; padding: 7px 16px; font-size: 13px; font-family: inherit; cursor: pointer;
+    height: 32px; padding: 0 12px; border: 1px solid var(--borde); border-radius: 8px;
+    background: var(--carta); color: var(--tinta); font: 500 13px Geist, system-ui, sans-serif;
+    cursor: pointer; transition: background .15s, border-color .15s, transform .1s;
   }
+  button:hover { background: var(--hover); border-color: var(--tinta-3); }
   button:active { transform: scale(.97); }
+  button.icono { width: 32px; padding: 0; font-size: 15px; line-height: 1; }
   :focus-visible { outline: 2px solid var(--tinta); outline-offset: 2px; }
-  .aviso { color: var(--tinta-3); font-size: 13px; padding: 8px 4px; }
+
+  /* ─ héroe ─ */
+  .heroe {
+    position: relative; overflow: hidden;
+    border: 1px solid var(--borde); border-radius: 12px; background: var(--carta);
+    padding: 24px; display: flex; align-items: flex-end; gap: 28px; flex-wrap: wrap;
+    animation: entra .45s ease-out both;
+  }
+  .heroe::before {
+    content: ""; position: absolute; inset: -40% -20% auto; height: 130%;
+    background: radial-gradient(60% 90% at 30% 0%, var(--glow, transparent), transparent 70%);
+    opacity: .14; pointer-events: none;
+  }
+  .miga { font-family: "Geist Mono", ui-monospace, monospace; font-size: 11px;
+          letter-spacing: .06em; text-transform: uppercase; color: var(--tinta-3); }
+  .heroe .alias-grande {
+    font-size: clamp(34px, 8vw, 44px); font-weight: 650; letter-spacing: -.045em; line-height: 1.1; margin-top: 6px;
+    background: linear-gradient(180deg, var(--grad-a), var(--grad-b));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .heroe .sub { font-family: "Geist Mono", ui-monospace, monospace; font-size: 12.5px; color: var(--tinta-2); margin-top: 8px; }
+  .heroe .libres { margin-left: auto; display: flex; flex-direction: column; gap: 12px; width: min(300px, 100%); }
+  .libres .fila { display: flex; justify-content: space-between; font-family: "Geist Mono", ui-monospace, monospace;
+                  font-size: 11px; color: var(--tinta-3); margin-bottom: 6px; font-variant-numeric: tabular-nums; }
+  .libres .fila b { color: var(--tinta); font-weight: 500; }
+
+  /* ─ medidores ─ */
+  .pista { height: 4px; border-radius: 2px; background: var(--pista); overflow: hidden; }
+  .relleno { display: block; height: 100%; border-radius: 2px; width: 0;
+             background: linear-gradient(90deg, color-mix(in srgb, var(--color-barra, var(--tinta)) 70%, transparent), var(--color-barra, var(--tinta)));
+             transition: width .7s cubic-bezier(.2,.8,.2,1); }
+  @supports not (background: color-mix(in srgb, red 50%, blue)) { .relleno { background: var(--color-barra, var(--tinta)); } }
+
+  /* ─ tabla de cuentas ─ */
+  .tabla { border: 1px solid var(--borde); border-radius: 12px; background: var(--carta);
+           margin-top: 16px; overflow: hidden; animation: entra .45s ease-out .07s both; }
+  .thead, .filacta { display: grid; grid-template-columns: 140px 1fr 1fr 210px; gap: 20px; align-items: center; padding: 14px 20px; }
+  .thead { padding: 10px 20px; background: var(--carta-2); border-bottom: 1px solid var(--borde);
+           font-family: "Geist Mono", ui-monospace, monospace; font-size: 11px; letter-spacing: .05em;
+           text-transform: uppercase; color: var(--tinta-3); }
+  .thead span:last-child { text-align: right; }
+  .filacta { border-top: 1px solid var(--borde-2); transition: background .15s; animation: entra .4s ease-out both; }
+  .filacta:first-of-type { border-top: none; }
+  .filacta:hover { background: var(--hover); }
+  .filacta.vieja > * { opacity: .55; }
+  .cta-id { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .cta-id .punto { width: 7px; height: 7px; border-radius: 50%; flex: none; background: var(--color-barra, var(--gris)); }
+  .cta-id .alias { font-size: 15px; font-weight: 600; letter-spacing: -.02em; }
+  .cta-id .etiq { font-family: "Geist Mono", ui-monospace, monospace; font-size: 10.5px; color: var(--tinta-3); white-space: nowrap; }
+  .medidor .fila { display: flex; justify-content: space-between; gap: 10px; font-family: "Geist Mono", ui-monospace, monospace;
+                   font-size: 11.5px; color: var(--tinta-3); margin-bottom: 6px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .medidor .fila .uso { color: var(--tinta); overflow: hidden; text-overflow: ellipsis; }
+  .maqs { text-align: right; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+  .maq .host { font-family: "Geist Mono", ui-monospace, monospace; font-size: 12px; color: var(--tinta);
+               overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .maq .det { font-family: "Geist Mono", ui-monospace, monospace; font-size: 11.5px; color: var(--tinta-3); margin-top: 2px;
+              overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .maq.viejo .host { color: var(--tinta-3); }
+  .sindato-txt { font-family: "Geist Mono", ui-monospace, monospace; font-size: 11.5px; color: var(--tinta-3); }
+
+  /* ─ sin sesión ─ */
+  .sinsesion { border: 1px solid var(--borde); border-radius: 12px; background: var(--carta); margin-top: 16px;
+               overflow: hidden; animation: entra .45s ease-out .14s both; }
+  .sinsesion .cab { padding: 10px 20px; background: var(--carta-2); border-bottom: 1px solid var(--borde);
+                    font-family: "Geist Mono", ui-monospace, monospace; font-size: 11px; letter-spacing: .05em;
+                    text-transform: uppercase; color: var(--tinta-3); }
+  .sinsesion .maqfila { display: flex; justify-content: space-between; gap: 12px; padding: 12px 20px;
+                        border-top: 1px solid var(--borde-2); font-family: "Geist Mono", ui-monospace, monospace; font-size: 12px; }
+  .sinsesion .maqfila:first-of-type { border-top: none; }
+  .sinsesion .maqfila span:last-child { color: var(--tinta-3); text-align: right; }
+
+  .pie { display: flex; justify-content: space-between; gap: 12px; margin-top: 14px; padding: 0 2px;
+         font-family: "Geist Mono", ui-monospace, monospace; font-size: 11.5px; color: var(--tinta-3); }
+  .aviso { color: var(--tinta-3); font-size: 13px; padding: 8px 2px; }
+  @keyframes entra { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: none } }
+
+  /* ─ móvil: la tabla colapsa a tarjetas ─ */
+  @media (max-width: 720px) {
+    .thead { display: none; }
+    .filacta { grid-template-columns: 1fr; gap: 12px; padding: 16px 18px; }
+    .maqs { text-align: left; }
+    .maq .host, .maq .det { white-space: normal; }
+    .heroe { padding: 20px 18px; }
+    .heroe .libres { margin-left: 0; }
+    .reloj { display: none; }
+  }
   @media (prefers-reduced-motion: reduce) {
-    .heroe, .tarjeta { animation: none } .relleno { transition: none } .vivo .punto { animation: none }
+    * { animation: none !important; transition: none !important; }
   }
 </style>
 </head>
@@ -123,50 +169,79 @@
 <header>
   <h1>Cuentas Claude</h1>
   <span class="vivo" id="vivo"><span class="punto"></span><span id="vivo-txt">conectando…</span></span>
+  <span class="reloj mono" id="reloj"></span>
+  <span class="acciones">
+    <button class="icono" id="tema" title="Cambiar tema" aria-label="Cambiar tema">◐</button>
+    <button onclick="cargar()">Refrescar</button>
+  </span>
 </header>
 <div id="app"><div class="aviso">Cargando…</div></div>
-<div class="pie"><span id="actualizado"></span><button onclick="cargar()">Refrescar</button></div>
+<div class="pie"><span id="actualizado">—</span><span>se refresca cada 2 min</span></div>
 <noscript><div class="aviso">Este tablero necesita JavaScript.</div></noscript>
 <script src="agregacion.js"></script>
 <script>
 const GIST_ID = "5b820c7ae6023afbfb862b25b5e4c177"; // mismo valor que reportar.py
 let ultimoEstado = null;
 let ultimoFetchOk = null;
+let primeraPintura = true;
 
 function esc(s) {
   return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 }
 
 const ETIQUETA = { verde: "libre", amarillo: "a media carga", rojo: "agotada" };
+const COLOR = { verde: "var(--verde)", amarillo: "var(--amarillo)", rojo: "var(--rojo)" };
+
+/* ─ tema: sistema por defecto, toggle manual persistido ─ */
+(function () {
+  const guardado = localStorage.getItem("tema");
+  if (guardado === "dark" || guardado === "light") document.documentElement.dataset.theme = guardado;
+  document.getElementById("tema").addEventListener("click", () => {
+    const raiz = document.documentElement;
+    const oscuroAhora = raiz.dataset.theme === "dark" ||
+      (!raiz.dataset.theme && matchMedia("(prefers-color-scheme: dark)").matches);
+    raiz.dataset.theme = oscuroAhora ? "light" : "dark";
+    localStorage.setItem("tema", raiz.dataset.theme);
+  });
+})();
 
 function cuentaRegresiva(iso, ahoraMs, viejo) {
   if (!iso) return "";
   const s = (Date.parse(iso) - ahoraMs) / 1000;
+  if (!isFinite(s)) return "";
   if (s <= 0) return viejo ? "ventana reseteada" : "reseteando…";
   const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), seg = Math.floor(s % 60);
   return h ? `resetea en ${h} h ${m} m` : `resetea en ${m} m ${String(seg).padStart(2, "0")} s`;
 }
 
-function medidor(nombre, ventana, clase, viejo) {
-  const pct = Number(ventana.pct);
-  const ancho = isFinite(pct) ? Math.min(Math.max(pct, 0), 100) : 0;
-  return `<div class="medidor ${clase}">
+function anchoPct(pct) {
+  const n = Number(pct);
+  return isFinite(n) ? Math.min(Math.max(n, 0), 100) : 0;
+}
+
+function barra(pct) {
+  const w = anchoPct(pct);
+  return `<div class="pista"><i class="relleno" data-w="${w}" style="width:${primeraPintura ? 0 : w}%"></i></div>`;
+}
+
+function medidor(nombre, ventana, viejo) {
+  return `<div class="medidor">
     <div class="fila">
-      <span class="nombre">${nombre} · <span class="pct mono">${esc(String(ventana.pct))}%</span> usado</span>
-      <span class="reset mono t-reset" data-reset="${esc(String(ventana.resetea || ""))}" data-viejo="${viejo ? 1 : 0}"></span>
+      <span class="uso">${nombre} · ${esc(String(ventana.pct))}% usado</span>
+      <span class="t-reset" data-reset="${esc(String(ventana.resetea || ""))}" data-viejo="${viejo ? 1 : 0}"></span>
     </div>
-    <div class="pista"><div class="relleno" style="width:${ancho}%"></div></div>
+    ${barra(ventana.pct)}
   </div>`;
 }
 
-function compuHtml(m, ahoraMs) {
+function maqHtml(m) {
   const act = m.ultima_actividad;
   const det = act
     ? `<span class="t-hace" data-ts="${esc(String(act.hace))}"></span> · ${esc(act.proyecto || "?")}`
     : "sin actividad";
   const extra = m.fresco ? "" : ` · sin reporte <span class="t-hace" data-ts="${esc(String(m.reportado))}"></span>`;
-  return `<div class="compu ${m.fresco ? "" : "viejo"}">
-    <span class="clave mono">${esc(m.clave)}</span><span class="detalle">${det}${extra}</span>
+  return `<div class="maq ${m.fresco ? "" : "viejo"}">
+    <div class="host">${esc(m.clave)}</div><div class="det">${det}${extra}</div>
   </div>`;
 }
 
@@ -175,46 +250,69 @@ function pintar(estado) {
   const agg = agregar(estado, new Date(ahoraMs).toISOString());
   let html = "";
 
+  /* héroe */
   const r = agg.recomendada;
   if (r === null) {
-    html += `<div class="heroe sindato"><div class="miga">→ Usa</div><div class="alias">Sin dato de cupo</div></div>`;
+    html += `<div class="heroe"><div><div class="miga">→ Usa</div>
+      <div class="alias-grande">Sin dato de cupo</div>
+      <div class="sub">ninguna cuenta tiene medición todavía</div></div></div>`;
   } else {
     const c = agg.cuentas.find(x => x.alias === r.alias);
-    const viejaNota = r.dato_de_hace_s > FRESCO_S
-      ? `<div class="datoviejo">con dato de ${humanizar(r.dato_de_hace_s)}</div>` : "";
-    const cifras = c && c.cupo ? `<div class="cifras">
-        <span>5 h: <b class="mono">${esc(String(100 - c.cupo.cinco_horas.pct))}%</b> libre</span>
-        <span>semana: <b class="mono">${esc(String(100 - c.cupo.semanal.pct))}%</b> libre</span>
-        <span class="mono t-reset" data-reset="${esc(String(c.cupo.cinco_horas.resetea || ""))}" data-viejo="${c.fresco ? 0 : 1}"></span>
+    const glow = c && c.semaforo ? COLOR[c.semaforo] : "transparent";
+    const nota = r.dato_de_hace_s > FRESCO_S ? ` · con dato de ${humanizar(r.dato_de_hace_s)}` : "";
+    const sub = c && c.cupo
+      ? `<span class="t-reset" data-reset="${esc(String(c.cupo.cinco_horas.resetea || ""))}" data-viejo="${c.fresco ? 0 : 1}"></span>${nota}`
+      : "";
+    const libres = c && c.cupo ? `<div class="libres">
+        <div><div class="fila"><span>5 h libre</span><b>${esc(String(100 - c.cupo.cinco_horas.pct))}%</b></div>${barra(100 - c.cupo.cinco_horas.pct)}</div>
+        <div><div class="fila"><span>semana libre</span><b>${esc(String(100 - c.cupo.semanal.pct))}%</b></div>${barra(100 - c.cupo.semanal.pct)}</div>
       </div>` : "";
-    html += `<div class="heroe"><div class="miga">→ Usa</div><div class="alias">${esc(r.alias)}</div>${viejaNota}${cifras}</div>`;
+    html += `<div class="heroe" style="--glow:${glow}"><div style="min-width:0">
+      <div class="miga">→ Usa</div>
+      <div class="alias-grande">${esc(r.alias)}</div>
+      <div class="sub">${sub}</div></div>${libres}</div>`;
   }
 
-  for (const c of agg.cuentas) {
+  /* tabla de cuentas */
+  html += `<div class="tabla">
+    <div class="thead"><span>Cuenta</span><span>5 horas</span><span>Semana</span><span>Máquinas</span></div>`;
+  agg.cuentas.forEach((c, i) => {
     const vieja = c.cupo && !c.fresco;
-    const chip = c.cupo
-      ? `<span class="chip ${c.semaforo}"><span class="punto"></span>${ETIQUETA[c.semaforo]}${vieja ? ` · dato de <span class="t-hace" data-ts="${esc(String(c.medido))}"></span>` : ""}</span>`
-      : `<span class="chip gris"><span class="punto"></span>cupo desconocido</span>`;
-    html += `<div class="tarjeta ${vieja ? "vieja" : ""}">
-      <div class="cabecera"><span class="alias">${esc(c.alias)}</span>${chip}</div>`;
-    if (c.cupo) {
-      html += medidor("5 h", c.cupo.cinco_horas, c.semaforo, vieja);
-      html += medidor("Semana", c.cupo.semanal, c.semaforo, vieja);
-    } else {
-      html += `<div class="desconocido">Sin medición todavía — se llena cuando un compu entre a esta cuenta.</div>`;
-    }
-    if (c.maquinas.length) {
-      html += `<div class="compus">${c.maquinas.map(m => compuHtml(m, ahoraMs)).join("")}</div>`;
-    }
-    html += `</div>`;
-  }
+    const color = c.semaforo ? COLOR[c.semaforo] : "var(--gris)";
+    const etiq = c.cupo
+      ? `${ETIQUETA[c.semaforo]}${vieja ? ` · dato de <span class="t-hace" data-ts="${esc(String(c.medido))}"></span>` : ""}`
+      : "cupo desconocido";
+    const maqs = c.maquinas.length ? c.maquinas.map(maqHtml).join("") : `<div class="maq"><div class="det">—</div></div>`;
+    html += `<div class="filacta ${vieja ? "vieja" : ""}" style="--color-barra:${color};animation-delay:${.1 + i * .06}s">
+      <div class="cta-id"><span class="punto"></span><span style="min-width:0">
+        <span class="alias">${esc(c.alias)}</span><br><span class="etiq">${etiq}</span></span></div>
+      ${c.cupo ? medidor("5 h", c.cupo.cinco_horas, vieja) : `<div class="sindato-txt">sin medición — se llena cuando un compu entre a esta cuenta</div>`}
+      ${c.cupo ? medidor("sem", c.cupo.semanal, vieja) : `<div class="sindato-txt"></div>`}
+      <div class="maqs">${maqs}</div>
+    </div>`;
+  });
+  html += `</div>`;
 
+  /* sin sesión */
   if (agg.sin_sesion.length) {
-    html += `<h2>Sin sesión</h2><div class="tarjeta"><div class="compus" style="border-top:none;padding-top:0;margin-top:0">
-      ${agg.sin_sesion.map(m => compuHtml(m, ahoraMs)).join("")}</div></div>`;
+    html += `<div class="sinsesion"><div class="cab">Sin sesión</div>
+      ${agg.sin_sesion.map(m => {
+        const act = m.ultima_actividad;
+        const det = act
+          ? `<span class="t-hace" data-ts="${esc(String(act.hace))}"></span> · ${esc(act.proyecto || "?")}`
+          : "sin actividad";
+        const extra = m.fresco ? "" : ` · sin reporte <span class="t-hace" data-ts="${esc(String(m.reportado))}"></span>`;
+        return `<div class="maqfila"><span>${esc(m.clave)}</span><span>${det}${extra}</span></div>`;
+      }).join("")}</div>`;
   }
 
   document.getElementById("app").innerHTML = html;
+  if (primeraPintura) {
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      document.querySelectorAll(".relleno[data-w]").forEach(el => { el.style.width = el.dataset.w + "%"; });
+    }));
+    primeraPintura = false;
+  }
   tictac();
 }
 
@@ -228,9 +326,11 @@ function tictac() {
   document.querySelectorAll(".t-reset").forEach(el => {
     el.textContent = cuentaRegresiva(el.dataset.reset, ahoraMs, el.dataset.viejo === "1");
   });
+  document.getElementById("reloj").textContent =
+    new Date(ahoraMs).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
   if (ultimoFetchOk) {
     document.getElementById("actualizado").textContent =
-      "Actualizado " + ultimoFetchOk.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" }) + " · se refresca cada 2 min";
+      "Actualizado " + ultimoFetchOk.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" });
   }
 }
 setInterval(tictac, 1000);
