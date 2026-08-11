@@ -111,12 +111,30 @@ def render(agregado, ahora):
     return "\n".join(filas)
 
 
+def _traer_estado():
+    # Raw del CDN primero: sin límite de API (el anónimo de api.github.com es 60/h por IP
+    # compartida). El ?t= esquiva el caché de 5 min. Fallback: la API clásica.
+    ts = int(datetime.now(timezone.utc).timestamp())
+    raw = urllib.request.Request(
+        f"https://gist.githubusercontent.com/santiago-prolibu/{GIST_ID}/raw/{GIST_FILE}?t={ts}",
+        headers={"User-Agent": "claude-tablero"})
+    try:
+        with urllib.request.urlopen(raw, timeout=20) as resp:
+            return json.load(resp)
+    except Exception:
+        api = urllib.request.Request(
+            f"https://api.github.com/gists/{GIST_ID}",
+            headers={"Accept": "application/vnd.github+json", "User-Agent": "claude-tablero"})
+        with urllib.request.urlopen(api, timeout=20) as resp:
+            return json.loads(json.load(resp)["files"][GIST_FILE]["content"])
+
+
 def main():
-    req = urllib.request.Request(
-        f"https://api.github.com/gists/{GIST_ID}",
-        headers={"Accept": "application/vnd.github+json", "User-Agent": "claude-tablero"})
-    with urllib.request.urlopen(req, timeout=20) as resp:
-        estado = json.loads(json.load(resp)["files"][GIST_FILE]["content"])
+    try:
+        estado = _traer_estado()
+    except Exception as e:
+        print(f"No se pudo leer el estado ({e}). Reintenta en un momento.")
+        raise SystemExit(1)
     ahora = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     print(render(agregar(estado, ahora), ahora))
 

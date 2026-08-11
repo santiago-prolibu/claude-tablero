@@ -337,13 +337,25 @@ function tictac() {
 }
 setInterval(tictac, 1000);
 
-async function cargar() {
-  const vivo = document.getElementById("vivo");
+async function traerEstado() {
+  // Raw del CDN: sin límite de API (el límite anónimo de api.github.com es 60/h POR IP,
+  // y una oficina entera lo comparte). El ?t= esquiva el caché de 5 min del CDN.
   try {
+    const resp = await fetch(`https://gist.githubusercontent.com/santiago-prolibu/${GIST_ID}/raw/estado.json?t=${Date.now()}`);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    return await resp.json();
+  } catch (e) {
     const resp = await fetch(`https://api.github.com/gists/${GIST_ID}`,
       { headers: { Accept: "application/vnd.github+json" } });
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    ultimoEstado = JSON.parse((await resp.json()).files["estado.json"].content);
+    return JSON.parse((await resp.json()).files["estado.json"].content);
+  }
+}
+
+async function cargar() {
+  const vivo = document.getElementById("vivo");
+  try {
+    ultimoEstado = await traerEstado();
     ultimoFetchOk = new Date();
     vivo.classList.remove("caido");
     document.getElementById("vivo-txt").textContent = "en vivo";
