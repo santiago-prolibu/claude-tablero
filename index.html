@@ -210,7 +210,7 @@
 <script src="agregacion.js"></script>
 <script>
 const GIST_ID = "5b820c7ae6023afbfb862b25b5e4c177"; // mismo valor que reportar.py
-const VERSION = "v13"; // subir en cada cambio de UI — dispara la auto-recarga de pestañas abiertas
+const VERSION = "v14"; // subir en cada cambio de UI — dispara la auto-recarga de pestañas abiertas
 let ultimoEstado = null;
 let ultimoFetchOk = null;
 let primeraPintura = true;
@@ -259,6 +259,7 @@ function cuentaRegresiva(iso, ahoraMs, viejo) {
   if (!isFinite(s)) return "";
   if (s <= 0) return viejo ? "ventana reseteada" : "reseteando…";
   const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), seg = Math.floor(s % 60);
+  if (h >= 48) { const d = Math.floor(h / 24); return `resetea en ${d} d ${h % 24} h`; }
   return h ? `resetea en ${h} h ${m} m` : `resetea en ${m} m ${String(seg).padStart(2, "0")} s`;
 }
 
