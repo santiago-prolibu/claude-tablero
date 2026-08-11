@@ -51,10 +51,11 @@ Criterios de éxito:
 
 Script bash + python3 (sin dependencias externas; ambos presentes en macOS con las herramientas de desarrollo). Instalado en `~/.claude-tablero/reportar.sh`. Cada ejecución:
 
-1. **Cuenta logueada:** lee `~/.claude.json` → `oauthAccount.emailAddress` y `oauthAccount.displayName`. El `displayName` (p. ej. "Gamma") es el **alias público**; el email jamás sale del compu.
-2. **Cupo:** lee el token OAuth de Claude Code del Keychain de macOS (servicio `Claude Code-credentials`; primera lectura pide autorización → "Permitir siempre", una vez por compu) y consulta el endpoint de uso OAuth de Anthropic (el mismo que alimenta `/usage`). Extrae: % usado de la ventana de 5 h, % del límite semanal, y timestamps de reset de ambas. El endpoint y los headers exactos se validan en la implementación en este compu antes de replicar a los demás; cualquier fallo (401 por token vencido, cambio de API, sin red) degrada a `cupo: null` sin abortar el reporte.
-3. **Última actividad:** busca el `.jsonl` más reciente bajo `~/.claude/projects/*/` → timestamp de última actividad y nombre del proyecto (nombre de la carpeta del proyecto, des-serializado a ruta legible; se publica solo el último segmento, p. ej. `prolibu-front-v2`).
-4. **Publica:** GET del gist → reemplaza **solo su propia entrada** (clave: hostname) en `estado.json` → PATCH del gist con el PAT.
+1. **Identidad del compu:** la clave de la entrada es `scutil --get LocalHostName` (estable ante cambios de red, sin espacios; fallback `hostname -s` si viniera vacío). Nunca `hostname` a secas: su sufijo (`.local`/`.lan`) varía según la red y crearía entradas fantasma.
+2. **Cuenta logueada:** lee `~/.claude.json` → `oauthAccount.emailAddress` y `oauthAccount.displayName`. El `displayName` (p. ej. "Gamma") es el **alias público**; el email jamás sale del compu. Si no hay `oauthAccount` (compu deslogueado durante una rotación), publica `cuenta: null` — el mapeo y la última actividad siguen valiendo.
+3. **Cupo:** lee el token OAuth de Claude Code del Keychain de macOS (servicio `Claude Code-credentials`; primera lectura pide autorización → "Permitir siempre", una vez por compu) y consulta el endpoint de uso OAuth de Anthropic (el mismo que alimenta `/usage`; el binario instalado confirma `GET /api/oauth/usage`). Extrae: % usado de la ventana de 5 h, % del límite semanal, y timestamps de reset de ambas. El endpoint y los headers exactos se validan en la implementación en este compu antes de replicar a los demás; cualquier fallo (401 por token vencido, cambio de API, sin red, deslogueado) degrada a cupo no medido sin abortar el reporte.
+4. **Última actividad:** busca el `.jsonl` más reciente bajo `~/.claude/projects/*/` → el timestamp es el mtime del archivo, y el nombre del proyecto es el **basename del campo `cwd`** que aparece en las primeras líneas de ese `.jsonl` (verificado en este compu). No se des-serializa el nombre de la carpeta: la codificación de `/` como `-` es ambigua frente a guiones reales (`-Users-agox-...-prolibu-front-v2` no permite recuperar `prolibu-front-v2` de forma unívoca).
+5. **Publica:** GET del gist → en `estado.json` reemplaza **su propia entrada** en `maquinas` (clave: LocalHostName) y, si midió cupo, actualiza también `cuentas[<alias>]` (último cupo conocido de esa cuenta) → PATCH del gist con el PAT.
 
 Programación: **launchd** (`~/Library/LaunchAgents/com.prolibu.claude-tablero.plist`), `StartInterval` 300, `RunAtLoad` true. Logs en `~/.claude-tablero/reportar.log` (truncado para no crecer sin límite).
 
@@ -64,28 +65,38 @@ Programación: **launchd** (`~/Library/LaunchAgents/com.prolibu.claude-tablero.p
 {
   "version": 1,
   "maquinas": {
-    "MacBook-Pro-de-Santiago": {
+    "MacBook-Pro-Santiago": {
       "cuenta": "Gamma",
-      "cupo": {
-        "cinco_horas": { "pct": 62, "resetea": "2026-08-11T20:00:00Z" },
-        "semanal":     { "pct": 31, "resetea": "2026-08-14T13:00:00Z" }
-      },
       "ultima_actividad": { "hace": "2026-08-11T17:42:10Z", "proyecto": "prolibu-front-v2" },
       "reportado": "2026-08-11T17:45:02Z"
+    },
+    "Mini-Oficina": {
+      "cuenta": null,
+      "ultima_actividad": { "hace": "2026-08-11T15:10:00Z", "proyecto": "siteforge" },
+      "reportado": "2026-08-11T17:44:31Z"
+    }
+  },
+  "cuentas": {
+    "Gamma": {
+      "cinco_horas": { "pct": 62, "resetea": "2026-08-11T20:00:00Z" },
+      "semanal":     { "pct": 31, "resetea": "2026-08-14T13:00:00Z" },
+      "medido": "2026-08-11T17:45:02Z",
+      "por": "MacBook-Pro-Santiago"
     }
   }
 }
 ```
 
-`cupo` es `null` cuando no se pudo medir (token vencido, sin red, API cambió). Campos en ISO-8601 UTC; las vistas convierten a hora local.
+El cupo es propiedad de la **cuenta**, no del compu: vive en el bloque `cuentas`, que guarda el **último cupo conocido por alias** y sobrevive a las rotaciones (si todos los compus deslogean de "Beta", su última medición queda ahí con su `medido`). `maquinas.<clave>.cuenta` es `null` cuando el compu está deslogueado. Una cuenta que nunca ha sido medida simplemente no está en `cuentas`. Campos en ISO-8601 UTC; las vistas convierten a hora local.
 
 ### 4.3 Reglas de agregación (compartidas por web y terminal)
 
-- **Lista de cuentas** = unión de los alias presentes en los reportes (no hay lista fija; una cuenta nueva aparece sola).
-- **Cupo por cuenta** = el del reporte **más fresco** entre los compus logueados en esa cuenta (misma cuenta ⇒ mismos límites).
-- **Cuenta recomendada** = la de menor `max(pct_5h, pct_semanal)` entre las que tienen dato fresco. Empate: menor `pct_5h`.
+- **Lista de cuentas** = claves de `cuentas` ∪ alias no nulos en `maquinas` (no hay lista fija; una cuenta nueva aparece sola y una rotada no desaparece).
+- **Cupo por cuenta** = `cuentas[<alias>]` (último conocido), con frescura dada por su `medido`.
+- **Cuenta recomendada** = la de menor `max(pct_5h, pct_semanal)` entre las que tienen cupo **fresco** (`medido` ≤ 15 min). Empate: menor `pct_5h`. Una cuenta sin cupo medido nunca participa, aunque su reporte sea fresco. **Fallback:** si ninguna tiene cupo fresco, se recomienda sobre el cupo menos viejo, marcado "con dato de hace X"; si ninguna cuenta tiene cupo en absoluto, el banner y la línea `→ Usa:` muestran "sin dato de cupo".
 - **Semáforo** (sobre `max(pct_5h, pct_semanal)`): 🟢 < 50 %, 🟡 50–80 %, 🔴 > 80 %.
-- **Frescura:** un compu con reporte > 15 min se muestra gris ("sin reporte hace X"). Una cuenta cuyo dato más fresco supera 15 min muestra su cupo atenuado con "dato de hace X". Una cuenta sin ningún compu logueado conserva su último cupo conocido (atenuado) mientras exista algún reporte viejo que la mencione — el compu que rotó de cuenta deja de contarle a la vieja, pero su última entrada con esa cuenta persiste hasta que ese hostname reporte de nuevo.
+- **Frescura:** un compu con `reportado` > 15 min se muestra gris ("sin reporte hace X"). Una cuenta con `medido` > 15 min muestra su cupo atenuado con "dato de hace X".
+- **Compus deslogueados** (`cuenta: null`): se listan en una sección aparte "Sin sesión", con su última actividad y frescura.
 
 ### 4.4 Tablero web
 
@@ -93,11 +104,11 @@ Página estática (HTML/CSS/JS vanilla, un solo archivo) en el repo, servida por
 
 - Lee el gist por la API de GitHub (`https://api.github.com/gists/<ID>`, anónimo). Auto-refresh cada **2 minutos** (≈30 req/h, bajo el límite anónimo de 60/h por IP) + botón de refresco manual.
 - **Mobile-first.** Tema claro/oscuro según el sistema.
-- Layout: arriba, banner con la **cuenta recomendada**. Luego una tarjeta por cuenta: alias, semáforo, barra del cupo 5 h y barra del semanal, cuenta regresiva "resetea en 2 h 15 m". Dentro de cada tarjeta, los compus logueados en esa cuenta: nombre, "hace 4 min · prolibu-front-v2", y estado gris si el reporte está viejo.
+- Layout: arriba, banner con la **cuenta recomendada** (o "sin dato de cupo", según el fallback de §4.3). Luego una tarjeta por cuenta: alias, semáforo, barra del cupo 5 h y barra del semanal, cuenta regresiva "resetea en 2 h 15 m" (si el reset ya pasó, "ventana reseteada · dato de hace X"). Dentro de cada tarjeta, los compus logueados en esa cuenta: nombre, "hace 4 min · prolibu-front-v2", y estado gris si el reporte está viejo. Al final, la sección **"Sin sesión"** con los compus deslogueados.
 
 ### 4.5 Comando `cuentas`
 
-Script (bash + python3) que lee el mismo gist por la API y pinta la tabla en la terminal, con las mismas reglas de agregación y la línea final `→ Usa: <alias>`. Instalado por el instalador en `/usr/local/bin/cuentas` (fallback `~/.local/bin` si no hay permisos, avisando del PATH).
+Script (bash + python3) que lee el mismo gist por la API y pinta la tabla en la terminal, con las mismas reglas de agregación (§4.3, incluidos los fallbacks) y la línea final `→ Usa: <alias>` (o `→ Sin dato de cupo`). Instalado por el instalador en `/usr/local/bin/cuentas` (fallback `~/.local/bin` si no hay permisos, avisando del PATH).
 
 ### 4.6 Instalador (`instalar.sh`)
 
@@ -113,7 +124,7 @@ Bootstrap único (una sola vez, en el primer compu): crear el PAT fine-grained (
 
 ## 5. Seguridad y privacidad
 
-- **Se publica** (legible por URL): alias de cuenta, hostname del compu, porcentajes de cupo, horas de reset, último proyecto (solo nombre de carpeta), timestamps.
+- **Se publica** (legible por URL): alias de cuenta, nombre local del compu (LocalHostName), porcentajes de cupo, horas de reset, último proyecto (solo el basename del directorio de trabajo), timestamps.
 - **Nunca se publica:** emails, tokens (ni de GitHub ni de Anthropic), contenido de sesiones, rutas completas.
 - El PAT vive solo en cada compu (`chmod 600`) y solo puede editar gists — si se filtra, el daño posible es editar gists de Santiago.
 - El token de Anthropic nunca sale del compu: se usa localmente contra el endpoint de uso y ya.
@@ -122,11 +133,13 @@ Bootstrap único (una sola vez, en el primer compu): crear el PAT fine-grained (
 
 | Caso | Comportamiento |
 |---|---|
-| Compu apagado/dormido | Su entrada envejece; el tablero la muestra gris con "sin reporte hace X". |
-| Rotación de cuenta en un compu | El siguiente reporte (≤5 min) trae el alias nuevo; el mapeo se corrige solo. |
-| Dos compus en la misma cuenta | El cupo se muestra una vez por cuenta (reporte más fresco manda); ambos compus se listan bajo ella. |
-| Cuenta sin ningún compu logueado | Se muestra su último cupo conocido, atenuado y con fecha del dato. |
-| Token de Anthropic vencido / endpoint cambia / sin red al medir | `cupo: null`; el reporte sigue publicando mapeo y actividad; la vista muestra "cupo desconocido". |
+| Compu apagado/dormido | Su entrada envejece; el tablero la muestra gris con "sin reporte hace X". (launchd no recupera intervalos perdidos durante el sleep — cubierto por esta misma regla de frescura.) |
+| Rotación de cuenta en un compu | El siguiente reporte (≤5 min) trae el alias nuevo; el mapeo se corrige solo. El cupo de la cuenta vieja **no se pierde**: queda en `cuentas[<alias>]` con su `medido`. |
+| Compu deslogueado (más compus que cuentas) | Reporta `cuenta: null` con su última actividad; las vistas lo muestran en la sección "Sin sesión". |
+| Dos compus en la misma cuenta | El cupo se muestra una vez por cuenta (la medición más fresca actualiza `cuentas[<alias>]`); ambos compus se listan bajo ella. |
+| Cuenta sin ningún compu logueado | Se muestra su último cupo conocido (bloque `cuentas`), atenuado y con fecha del dato. |
+| Ninguna cuenta con cupo fresco (p. ej. todos los Macs dormidos de noche) | Se recomienda sobre el cupo menos viejo, marcado "con dato de hace X"; sin ningún cupo, "sin dato de cupo". |
+| Token de Anthropic vencido / endpoint cambia / sin red al medir | No se actualiza `cuentas[<alias>]`; el reporte sigue publicando mapeo y actividad; la vista muestra el último cupo conocido atenuado o "cupo desconocido" si nunca hubo. |
 | Choque de escrituras al gist (dos compus en el mismo segundo) | Última escritura gana y puede pisar una entrada ajena recién puesta; el ciclo siguiente (≤5 min) la restaura. Aceptado por frecuencia baja e impacto trivial. |
 | Falla el PATCH al gist (red, GitHub caído) | El reportero reintenta una vez; si falla, loguea y espera el próximo ciclo. |
 | API anónima de GitHub rate-limitea la lectura | Refresh de 2 min deja margen 2×; ante 403, la página muestra el último dato en memoria y reintenta después. |
