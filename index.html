@@ -153,7 +153,7 @@
   .filacta.ojo .punto { animation: pulso 2.4s ease-in-out infinite; }
   .filacta.aviso .etiq { color: var(--rojo); font-weight: 500; }
   .filacta.aviso .punto { animation: pulso 1.4s ease-in-out infinite; }
-  .maqs { text-align: right; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+  .maqs { text-align: right; min-width: 0; display: flex; flex-direction: column; gap: 8px; padding-right: 4px; }
   .maq { min-width: 0; }
   .maq .host { font-family: "Geist Mono", ui-monospace, monospace; font-size: 13px; color: var(--tinta);
                overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -210,7 +210,7 @@
 <script src="agregacion.js"></script>
 <script>
 const GIST_ID = "5b820c7ae6023afbfb862b25b5e4c177"; // mismo valor que reportar.py
-const VERSION = "v11"; // subir en cada cambio de UI — dispara la auto-recarga de pestañas abiertas
+const VERSION = "v12"; // subir en cada cambio de UI — dispara la auto-recarga de pestañas abiertas
 let ultimoEstado = null;
 let ultimoFetchOk = null;
 let primeraPintura = true;
@@ -431,7 +431,7 @@ async function buscarVersionNueva() {
     if (m && m[1] !== VERSION) location.reload();
   } catch (e) { /* sin red: se intenta en el próximo ciclo */ }
 }
-setInterval(buscarVersionNueva, 600000);
+setInterval(buscarVersionNueva, 180000);
 
 cargar();
 setInterval(cargar, 120000);
