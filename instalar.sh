@@ -30,7 +30,7 @@ fi
 chmod +x "$DESTINO_CMD"
 
 # 3. launchd
-curl -fsSL "$RAW/com.prolibu.claude-tablero.plist" | sed "s|__HOME__|$HOME|g" > "$PLIST"
+curl -fsSL "$RAW/com.prolibu.claude-tablero.plist" | sed "s|__HOME__|$HOME|g" > "$PLIST.tmp" && mv "$PLIST.tmp" "$PLIST"
 launchctl bootout "gui/$(id -u)/$LABEL" 2>/dev/null || true
 launchctl bootstrap "gui/$(id -u)" "$PLIST"
 
