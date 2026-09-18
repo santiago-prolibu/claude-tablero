@@ -220,6 +220,7 @@ test("humanizarTokens", () => {
   assert.equal(humanizarTokens(1234), "1,2 k");
   assert.equal(humanizarTokens(4200000), "4,2 M");
   assert.equal(humanizarTokens(119684653), "120 M");
-  assert.equal(humanizarTokens(2.4e9), "2,4 mil M");
+  assert.equal(humanizarTokens(2.4e9), "2.400 M");
+  assert.equal(humanizarTokens(4.6e9), "4.600 M");
   assert.equal(humanizarTokens(undefined), "0");
 });

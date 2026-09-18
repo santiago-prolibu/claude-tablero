@@ -173,11 +173,12 @@ function consumo(estado, hoy, dias) {
   };
 }
 
-// 950 → "950"; 12345 → "12 k"; 4200000 → "4,2 M"; 2.4e9 → "2,4 mil M". Un decimal solo bajo 10; coma decimal es-CO.
+// 950 → "950"; 12345 → "12 k"; 4200000 → "4,2 M"; 4.6e9 → "4.600 M". Un decimal solo bajo 10; formato es-CO.
+// Por encima de mil millones se sigue en millones con separador de miles: "4.600 M" se lee sin pensar,
+// "4,6 mil M" no.
 function humanizarTokens(n) {
   n = Number(n) || 0;
   const f = (v, u) => v.toLocaleString("es-CO", { maximumFractionDigits: v < 10 ? 1 : 0 }) + u;
-  if (n >= 1e9) return f(n / 1e9, " mil M");
   if (n >= 1e6) return f(n / 1e6, " M");
   if (n >= 1e3) return f(n / 1e3, " k");
   return String(Math.round(n));
