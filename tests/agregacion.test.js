@@ -131,7 +131,7 @@ test("orden por codepoint con mayúsculas y tildes", () => {
 });
 
 /* ─ consumo de tokens ─ */
-const { consumo, arbolConsumo, humanizarTokens, familiaModelo, nombreModelo } = require("../agregacion.js");
+const { consumo, humanizarTokens, familiaModelo, nombreModelo } = require("../agregacion.js");
 
 const B = (msgs, salida) => ({ msgs, entrada: 10, salida, cache_escr: 100, cache_lect: 1000 });
 
@@ -233,32 +233,6 @@ test("consumo: sin filtro (undefined, null o vacío) es lo mismo que todo", () =
   assert.equal(consumo(estadoConsumo(), "2026-08-11", 7, null).msgs, todo.msgs);
   assert.equal(consumo(estadoConsumo(), "2026-08-11", 7, {}).msgs, todo.msgs);
   assert.strictEqual(todo.filtro, null);
-});
-
-test("arbolConsumo: cuentas con sus máquinas, incluidas las que no publican consumo", () => {
-  const e = estadoConsumo();
-  // En uso pero con reportero viejo: no publica consumo.
-  e.maquinas.Viejo = { cuenta: "Gamma", ultima_actividad: null, reportado: "2026-08-11T17:50:00Z" };
-  // Reportero nuevo, pero todo su consumo cae fuera de la ventana.
-  e.maquinas.Dormido = { cuenta: "Alpha", ultima_actividad: null, reportado: "2026-08-11T17:50:00Z",
-    consumo: { dias: { "2026-07-30": { "claude-opus-5": B(1, 1) } } } };
-  const arbol = arbolConsumo(e, AHORA, "2026-08-11", 7);
-  // Con datos primero (de mayor a menor); "sin sesión" al final; Beta (sin máquinas ni datos) no aparece.
-  assert.deepEqual(arbol.map(c => c.alias), ["Gamma", "Alpha", "sin sesión"]);
-  assert.equal(arbol[0].fila.total, 3900);
-  assert.deepEqual(arbol[0].maquinas.map(m => [m.clave, m.estado, m.fila && m.fila.total]),
-    [["Mini", "datos", 3900], ["Viejo", "sin-reportero", null]]);
-  assert.deepEqual(arbol[1].maquinas.map(m => [m.clave, m.estado]), [["Air", "datos"], ["Dormido", "sin-ventana"]]);
-  assert.equal(arbol[2].fila, null);
-  assert.deepEqual(arbol[2].maquinas.map(m => [m.clave, m.estado]), [["Pro", "sin-reportero"]]);
-});
-
-test("arbolConsumo: una máquina fuera de uso pero con consumo en la ventana sigue bajo su cuenta", () => {
-  const e = estadoConsumo();
-  e.maquinas.Mini.reportado = "2026-08-09T00:00:00Z"; // fuera de uso para agregar(), pero con datos
-  const arbol = arbolConsumo(e, AHORA, "2026-08-11", 7);
-  const gamma = arbol.find(c => c.alias === "Gamma");
-  assert.deepEqual(gamma.maquinas.map(m => m.clave), ["Mini"]);
 });
 
 test("consumo: sin datos de consumo no revienta", () => {

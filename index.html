@@ -52,18 +52,20 @@
   html { -webkit-text-size-adjust: 100%; }
   body {
     background: var(--plano); color: var(--tinta);
-    font: 14px/1.5 Geist, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    font: 15px/1.5 Geist, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
-    padding: 0 24px calc(48px + env(safe-area-inset-bottom));
-    max-width: 1480px; margin: 0 auto;
+    padding: 0 18px calc(48px + env(safe-area-inset-bottom));
+    max-width: 1220px; margin: 0 auto;
     transition: background .25s ease, color .25s ease;
   }
   .mono { font-family: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace; font-variant-numeric: tabular-nums; }
 
-  /* ─ barra superior fija ─ */
-  .fijo { position: sticky; top: 0; z-index: 5; background: var(--plano); }
-  header { display: flex; align-items: center; gap: 12px; height: 64px; border-bottom: 1px solid var(--borde-2); flex-wrap: wrap; }
-  header h1 { font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
+  /* ─ bloque fijo: cabecera + héroe + encabezado de la tabla se quedan arriba al hacer scroll ─ */
+  .fijo { position: sticky; top: 0; z-index: 5; background: var(--plano); padding-top: 28px; }
+
+  /* ─ cabecera ─ */
+  header { display: flex; align-items: center; gap: 12px; padding-bottom: 20px; flex-wrap: wrap; }
+  header h1 { font-size: 13px; font-weight: 600; letter-spacing: -.01em; }
   .vivo { display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 9px;
           border: 1px solid var(--borde); border-radius: 999px; background: var(--carta);
           font-family: "Geist Mono", ui-monospace, monospace; font-size: 11px; color: var(--tinta-2); }
@@ -82,169 +84,159 @@
   button.icono { width: 32px; padding: 0; font-size: 15px; line-height: 1; }
   :focus-visible { outline: 2px solid var(--tinta); outline-offset: 2px; }
 
-  /* ─ dos columnas: cupo a la izquierda (fijo al hacer scroll), consumo a la derecha ─ */
-  .dos { display: grid; grid-template-columns: 440px minmax(0, 1fr); gap: 20px; align-items: start; margin-top: 20px; }
-  .izq { display: flex; flex-direction: column; gap: 14px; position: sticky; top: 76px; }
-  .izq.suelta { position: static; }
-
   /* ─ héroe ─ */
   .heroe {
     position: relative; overflow: hidden;
-    border: 1px solid var(--sem, var(--borde)); border-radius: 14px; background: var(--carta);
-    padding: 22px 24px; display: flex; flex-direction: column; gap: 18px;
+    border: 1px solid var(--borde); border-radius: 12px; background: var(--carta);
+    padding: 24px; display: flex; align-items: flex-end; gap: 28px; flex-wrap: wrap;
     animation: entra .45s ease-out both;
   }
   .heroe::before {
     content: ""; position: absolute; inset: -40% -20% auto; height: 130%;
-    background: radial-gradient(60% 90% at 30% 0%, var(--sem, transparent), transparent 70%);
-    opacity: .10; pointer-events: none;
+    background: radial-gradient(60% 90% at 30% 0%, var(--glow, transparent), transparent 70%);
+    opacity: .14; pointer-events: none;
   }
   .miga { font-family: "Geist Mono", ui-monospace, monospace; font-size: 11px;
-          letter-spacing: .08em; text-transform: uppercase; color: var(--sem, var(--tinta-3)); }
+          letter-spacing: .06em; text-transform: uppercase; color: var(--tinta-3); }
   .heroe .alias-grande {
-    font-size: clamp(34px, 4vw, 44px); font-weight: 700; letter-spacing: -.03em; line-height: 1.05; margin-top: 6px;
+    font-size: clamp(34px, 8vw, 44px); font-weight: 650; letter-spacing: -.045em; line-height: 1.1; margin-top: 6px;
     background: linear-gradient(180deg, var(--grad-a), var(--grad-b));
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
-  .heroe .sub { font-size: 13px; color: var(--tinta-2); margin-top: 8px; }
-  .heroe .sub b { color: var(--tinta); font-weight: 600; }
-  .heroe .libres { display: flex; flex-direction: column; gap: 12px; }
-  .libre { display: grid; grid-template-columns: 112px minmax(0, 1fr) 84px; gap: 12px; align-items: center; }
-  .libre .n { font-size: 13px; color: var(--tinta-2); white-space: nowrap; }
-  .libre .v { font-size: 14px; font-weight: 600; text-align: right; white-space: nowrap; }
-  .libre .v em { font-style: normal; font-weight: 400; font-size: 11px; color: var(--tinta-3); }
-  .libre .pista { height: 8px; border-radius: 4px; }
+  .heroe .sub { font-family: "Geist Mono", ui-monospace, monospace; font-size: 13.5px; color: var(--tinta-2); margin-top: 8px; }
+  .heroe .libres { margin-left: auto; display: flex; flex-direction: column; gap: 12px; width: min(300px, 100%); }
+  .libres .fila { display: flex; justify-content: space-between; align-items: baseline; font-family: "Geist Mono", ui-monospace, monospace;
+                  font-size: 12.5px; color: var(--tinta-3); margin-bottom: 6px; font-variant-numeric: tabular-nums; }
+  .libres .fila b { color: var(--tinta); font-weight: 600; font-size: 16px; letter-spacing: -.01em; }
 
   /* ─ medidores ─ */
-  .pista { height: 5px; border-radius: 3px; background: var(--pista); overflow: hidden; }
-  .relleno { display: block; height: 100%; border-radius: inherit; width: 0; background: var(--color-uso, var(--tinta));
+  .pista { height: 5px; border-radius: 2px; background: var(--pista); overflow: hidden; }
+  .relleno { display: block; height: 100%; border-radius: 2px; width: 0;
+             background: linear-gradient(90deg, color-mix(in srgb, var(--color-cuenta, var(--tinta)) 70%, transparent), var(--color-cuenta, var(--tinta)));
              transition: width .7s cubic-bezier(.2,.8,.2,1); }
+  @supports not (background: color-mix(in srgb, red 50%, blue)) { .relleno { background: var(--color-cuenta, var(--tinta)); } }
 
-  /* ─ lista de cuentas ─ */
-  .lista-cab { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 4px 4px 0; }
-  .lista-cab b { font-size: 13px; font-weight: 600; }
-  .lista-cab span { font-size: 12px; color: var(--tinta-3); }
-  .tabla { border: 1px solid var(--borde); border-radius: 14px; background: var(--carta); overflow: hidden; animation: entra .45s ease-out .07s both; }
-  .filacta { padding: 14px 20px; border-top: 1px solid var(--borde-2); display: flex; flex-direction: column; gap: 10px;
-             transition: background .15s; animation: entra .4s ease-out both; }
-  .filacta:first-child { border-top: none; }
-  .filacta.rec { box-shadow: inset 3px 0 0 var(--verde); }
+  /* ─ tabla de cuentas: el encabezado vive en el bloque fijo, las filas en su tarjeta ─ */
+  .tabla-cab { margin-top: 16px; border: 1px solid var(--borde); border-bottom: 0; border-radius: 12px 12px 0 0;
+               background: var(--carta); overflow: hidden; animation: entra .45s ease-out .07s both; }
+  .tabla { border: 1px solid var(--borde); border-top: 0; border-radius: 0 0 12px 12px; background: var(--carta);
+           overflow: hidden; animation: entra .45s ease-out .07s both; }
+  .thead, .filacta { display: grid; grid-template-columns: 170px 1.25fr .8fr 1.25fr minmax(220px, 310px); gap: 18px; align-items: center; padding: 16px 28px !important; }
+  .thead > *, .filacta > * { min-width: 0; }
+  .thead { padding: 10px 28px; background: var(--carta-2); border-bottom: 1px solid var(--borde);
+           font-family: "Geist Mono", ui-monospace, monospace; font-size: 11px; letter-spacing: .05em;
+           text-transform: uppercase; color: var(--tinta-3); }
+  .thead span:last-child { text-align: right; }
+  .filacta { border-top: 1px solid var(--borde-2); transition: background .15s; animation: entra .4s ease-out both; }
+  .filacta:first-of-type { border-top: none; }
+  .filacta:hover { background: var(--hover); }
   .filacta.vieja > * { opacity: .55; }
-  .cta-id { display: flex; align-items: center; gap: 8px; min-width: 0; flex-wrap: wrap; }
+  .cta-id { display: flex; align-items: center; gap: 8px; min-width: 0; }
   .cta-id .punto { width: 8px; height: 8px; border-radius: 50%; flex: none; background: var(--color-cuenta, var(--gris)); }
-  .cta-id .alias { font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
-  .pill { --pill: var(--tinta-3); padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; color: var(--pill);
-          background: color-mix(in srgb, var(--pill) 14%, transparent); white-space: nowrap; }
-  @supports not (background: color-mix(in srgb, red 50%, blue)) { .pill { background: var(--carta-2); } }
-  .filacta.ok .pill { --pill: var(--verde); }
-  .filacta.ojo .pill { --pill: var(--amarillo); }
-  .filacta.aviso .pill, .filacta.alerta .pill { --pill: var(--rojo); }
-  .etiq-dato, .resets { font-family: "Geist Mono", ui-monospace, monospace; font-size: 11.5px; color: var(--tinta-3); white-space: nowrap; }
-  .resets { margin-left: auto; }
-  .minis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-  .mini { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
-  .mini .v { font-family: "Geist Mono", ui-monospace, monospace; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
-  .mini .v b { font-weight: 600; }
-  .mini .v em { font-style: normal; color: var(--tinta-3); }
-  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-  .chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 999px; max-width: 100%; min-width: 0;
-          background: var(--carta-2); border: 1px solid var(--borde-2); font-size: 12px; }
-  .chip i { width: 6px; height: 6px; border-radius: 50%; background: var(--verde); flex: none; }
-  .chip.viejo i { background: var(--gris); }
-  .chip .h { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .chip .p { color: var(--tinta-3); white-space: nowrap; }
-  .sinmaq, .sindato-txt { font-size: 12px; color: var(--tinta-3); }
+  .cta-id .alias { font-size: 16.5px; font-weight: 600; letter-spacing: -.02em; }
+  .cta-id .etiq { font-family: "Geist Mono", ui-monospace, monospace; font-size: 11.5px; color: var(--tinta-3); white-space: normal; overflow-wrap: anywhere; line-height: 1.5; }
+  .etiq .etiq-dato { display: block; color: var(--tinta-3); font-weight: 400; }
+  .filacta.ok .etiq { color: var(--verde); }
+  .filacta.ojo .etiq { color: var(--amarillo); }
+  .medidor .fila { display: flex; justify-content: space-between; align-items: baseline; gap: 10px;
+                   font-family: "Geist Mono", ui-monospace, monospace; font-size: 12.5px; color: var(--tinta-2);
+                   margin-bottom: 6px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .medidor .fila .uso { flex: none; } /* el % jamás se trunca */
+  .medidor .pct { font-size: 16px; font-weight: 600; color: var(--tinta); letter-spacing: -.01em; }
+  .medidor .vent { display: none; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em;
+                   color: var(--tinta-3); margin-right: 7px; }
+  .medidor .fila .t-reset { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 
   /* ─ alarmas: agotada parpadea, media carga pulsa suave ─ */
   @keyframes alarma { 0%, 100% { opacity: 1 } 50% { opacity: .25 } }
-  .filacta.alerta { background: color-mix(in srgb, var(--rojo) 8%, transparent); }
-  @supports not (background: color-mix(in srgb, red 50%, blue)) { .filacta.alerta { background: rgba(220,43,43,.08); } }
-  .filacta.alerta .punto { animation: alarma 1.1s ease-in-out infinite; box-shadow: 0 0 0 4px color-mix(in srgb, var(--rojo) 18%, transparent); }
+  .filacta.alerta, .filacta.alerta:hover { background: color-mix(in srgb, var(--rojo) 8%, transparent); }
+  @supports not (background: color-mix(in srgb, red 50%, blue)) { .filacta.alerta, .filacta.alerta:hover { background: rgba(220,43,43,.08); } }
+  .filacta.alerta .punto { animation: alarma 1.1s ease-in-out infinite;
+                           box-shadow: 0 0 0 4px color-mix(in srgb, var(--rojo) 18%, transparent); }
+  .filacta.alerta .etiq { color: var(--rojo); font-weight: 500; }
   .filacta.alerta .relleno { animation: alarma 1.6s ease-in-out infinite; }
   .filacta.ojo .punto { animation: pulso 2.4s ease-in-out infinite; }
+  .filacta.aviso .etiq { color: var(--rojo); font-weight: 500; }
   .filacta.aviso .punto { animation: pulso 1.4s ease-in-out infinite; }
+  .maqs { text-align: right; min-width: 0; display: flex; flex-direction: column; gap: 8px; padding-right: 4px; }
+  .maq { min-width: 0; }
+  .maq .host { font-family: "Geist Mono", ui-monospace, monospace; font-size: 13px; color: var(--tinta);
+               overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .maq .det { font-family: "Geist Mono", ui-monospace, monospace; font-size: 12.5px; color: var(--tinta-3); margin-top: 2px;
+              overflow-wrap: anywhere; }
+  .maq.viejo .host { color: var(--tinta-3); }
+  .sindato-txt { font-family: "Geist Mono", ui-monospace, monospace; font-size: 12.5px; color: var(--tinta-3); }
 
   /* ─ sin sesión ─ */
-  .sinsesion { border: 1px solid var(--borde); border-radius: 14px; background: var(--carta); overflow: hidden; animation: entra .45s ease-out .14s both; }
-  .sinsesion .cab { padding: 10px 20px; background: var(--carta-2); border-bottom: 1px solid var(--borde);
+  .sinsesion { border: 1px solid var(--borde); border-radius: 12px; background: var(--carta); margin-top: 16px;
+               overflow: hidden; animation: entra .45s ease-out .14s both; }
+  .sinsesion .cab { padding: 10px 28px; background: var(--carta-2); border-bottom: 1px solid var(--borde);
                     font-family: "Geist Mono", ui-monospace, monospace; font-size: 11px; letter-spacing: .05em;
                     text-transform: uppercase; color: var(--tinta-3); }
-  .sinsesion .maqfila { display: flex; justify-content: space-between; gap: 12px; padding: 10px 20px;
-                        border-top: 1px solid var(--borde-2); font-family: "Geist Mono", ui-monospace, monospace; font-size: 12.5px; }
+  .sinsesion .maqfila { display: flex; justify-content: space-between; gap: 12px; padding: 12px 28px;
+                        border-top: 1px solid var(--borde-2); font-family: "Geist Mono", ui-monospace, monospace; font-size: 13px; }
   .sinsesion .maqfila:first-of-type { border-top: none; }
   .sinsesion .maqfila span:last-child { color: var(--tinta-3); text-align: right; }
 
   /* ─ consumo de tokens ─ */
-  .consumo { border: 1px solid var(--borde); border-radius: 14px; background: var(--carta); overflow: hidden; min-width: 0;
-             animation: entra .45s ease-out .12s both; }
-  .consumo .cab { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 14px 22px; border-bottom: 1px solid var(--borde-2); }
-  .consumo .cab h2 { font-size: 15px; font-weight: 600; margin-right: auto; }
+  .consumo { border: 1px solid var(--borde); border-radius: 12px; background: var(--carta); margin-top: 16px;
+             overflow: hidden; animation: entra .45s ease-out .12s both; }
+  .consumo .cab { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 14px 28px;
+                  background: var(--carta-2); border-bottom: 1px solid var(--borde); }
+  .consumo .cab h2 { font-size: 11px; font-weight: 500; letter-spacing: .05em; text-transform: uppercase; color: var(--tinta-3);
+                     font-family: "Geist Mono", ui-monospace, monospace; }
+  .consumo .resumen { font-family: "Geist Mono", ui-monospace, monospace; font-size: 12px; color: var(--tinta-2); }
+  .consumo .resumen b { color: var(--tinta); font-weight: 600; }
   .seg { display: inline-flex; border: 1px solid var(--borde); border-radius: 8px; overflow: hidden; background: var(--carta); }
-  .seg button { height: 32px; padding: 0 12px; border: 0; border-radius: 0; background: transparent; font-size: 13px; color: var(--tinta-2); }
+  .seg button { height: 28px; padding: 0 11px; border: 0; border-radius: 0; background: transparent; font-size: 12.5px; color: var(--tinta-2); }
   .seg button + button { border-left: 1px solid var(--borde); }
   .seg button[aria-pressed="true"] { background: var(--tinta); color: var(--plano); }
-  .filtro { height: 32px; padding: 0 28px 0 11px; border: 1px solid var(--borde); border-radius: 8px; background: var(--carta); color: var(--tinta);
-            font-size: 13px; font-family: inherit; max-width: 260px; appearance: none; -webkit-appearance: none; cursor: pointer;
+  .filtro { height: 28px; padding: 0 28px 0 11px; border: 1px solid var(--borde); border-radius: 8px; background: var(--carta); color: var(--tinta-2);
+            font-size: 12.5px; font-family: inherit; max-width: 240px; appearance: none; -webkit-appearance: none; cursor: pointer;
             background-image: linear-gradient(45deg, transparent 50%, var(--tinta-3) 50%), linear-gradient(135deg, var(--tinta-3) 50%, transparent 50%);
             background-position: right 14px center, right 9px center; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; }
   .filtro[data-activo="1"] { background-color: var(--tinta); color: var(--plano); border-color: var(--tinta);
             background-image: linear-gradient(45deg, transparent 50%, var(--plano) 50%), linear-gradient(135deg, var(--plano) 50%, transparent 50%); }
-  .kpis { display: flex; gap: 24px; align-items: baseline; flex-wrap: wrap; padding: 14px 22px; border-bottom: 1px solid var(--borde-2); }
-  .kpi { display: inline-flex; align-items: baseline; gap: 7px; white-space: nowrap; }
-  .kpi b { font-family: "Geist Mono", ui-monospace, monospace; font-size: 22px; font-weight: 600; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
-  .kpi span { font-size: 12px; color: var(--tinta-3); }
-  .leyenda { margin-left: auto; display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--tinta-2); }
+  .leyenda { margin-left: auto; display: flex; gap: 14px; flex-wrap: wrap; font-family: "Geist Mono", ui-monospace, monospace; font-size: 11.5px; color: var(--tinta-2); }
   .leyenda span { display: inline-flex; align-items: center; gap: 6px; }
   .leyenda i { width: 10px; height: 10px; border-radius: 2px; background: var(--f); }
-  .consumo .vacio { padding: 22px; font-size: 13px; color: var(--tinta-3); border-bottom: 1px solid var(--borde-2); }
+  .consumo .vacio { padding: 22px 28px; font-family: "Geist Mono", ui-monospace, monospace; font-size: 12.5px; color: var(--tinta-3); }
 
-  .serie { padding: 26px 22px 12px; border-bottom: 1px solid var(--borde-2); }
-  .serie .lienzo { display: grid; grid-template-columns: 60px minmax(0, 1fr); gap: 12px; }
-  .serie .ejey { height: 140px; display: flex; flex-direction: column; justify-content: space-between;
-                 font-family: "Geist Mono", ui-monospace, monospace; font-size: 11px; color: var(--tinta-3); }
-  .serie .ejey span { height: 0; display: flex; align-items: center; justify-content: flex-end; white-space: nowrap; }
-  .serie .cols { display: flex; align-items: flex-end; gap: 8px; height: 140px; border-bottom: 1px solid var(--borde);
-                 background-image: linear-gradient(var(--borde-2) 1px, transparent 1px); background-size: 100% 50%; }
+  .serie { padding: 20px 28px 12px; border-bottom: 1px solid var(--borde-2); }
+  .serie .cols { display: flex; align-items: flex-end; gap: 6px; height: 120px; border-bottom: 1px solid var(--borde); }
   .serie .col { flex: 1; min-width: 0; height: 100%; display: flex; flex-direction: column-reverse; justify-content: flex-start; gap: 2px;
                 position: relative; cursor: default; border-radius: 4px 4px 0 0; }
   .serie .col:hover, .serie .col:focus-visible { background: var(--hover); outline: none; }
-  .serie .col i { display: block; width: 100%; max-width: 28px; margin: 0 auto; background: var(--f); min-height: 2px; transition: height .5s cubic-bezier(.2,.8,.2,1); }
-  .serie .col i:last-child { border-radius: 4px 4px 0 0; }
+  .serie .col i { display: block; width: 100%; max-width: 24px; margin: 0 auto; background: var(--f); min-height: 2px; transition: height .5s cubic-bezier(.2,.8,.2,1); }
+  .serie .col i:last-child { border-radius: 4px 4px 0 0; }   /* el extremo del dato, redondeado; la base, recta */
   .serie .col .cima { position: absolute; left: 0; right: 0; bottom: 100%; margin-bottom: 4px; text-align: center; white-space: nowrap;
-                      font-family: "Geist Mono", ui-monospace, monospace; font-size: 11px; color: var(--tinta); }
-  .serie .eje { display: flex; gap: 8px; margin-top: 6px; font-family: "Geist Mono", ui-monospace, monospace; font-size: 11px; color: var(--tinta-3); }
+                      font-family: "Geist Mono", ui-monospace, monospace; font-size: 11px; color: var(--tinta-2); }
+  .serie .eje { display: flex; gap: 6px; margin-top: 6px; font-family: "Geist Mono", ui-monospace, monospace; font-size: 11px; color: var(--tinta-3); }
   .serie .eje span { flex: 1; text-align: center; min-width: 0; overflow: hidden; }
-  .serie .eje span.hoy { color: var(--tinta); font-weight: 600; }
+  .serie .eje span.hoy { color: var(--tinta); font-weight: 500; }
 
   .cuadros { display: grid; grid-template-columns: 1fr 1fr; }
-  .cuadro { padding: 18px 22px 20px; min-width: 0; }
+  .cuadro { padding: 18px 28px 20px; min-width: 0; }
   .cuadro + .cuadro { border-left: 1px solid var(--borde-2); }
-  .cuadro.ancho { grid-column: 1 / -1; border-left: 0; }
+  .cuadro.ancho { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--borde-2); }
   .cuadro h3 { font-family: "Geist Mono", ui-monospace, monospace; font-size: 11px; font-weight: 500; letter-spacing: .05em;
-               text-transform: uppercase; color: var(--tinta-3); margin-bottom: 10px; }
-  .cuadro .pista-nota { font-size: 12px; color: var(--tinta-3); margin-top: 10px; }
-  .grupo + .grupo { margin-top: 8px; }
-  .barra-fila { display: grid; grid-template-columns: minmax(96px, 160px) minmax(0, 1fr) 76px; gap: 10px; align-items: center; padding: 6px 0; }
-  .cuadro.arbol .barra-fila { grid-template-columns: minmax(120px, 220px) minmax(0, 1fr) 76px; }
+               text-transform: uppercase; color: var(--tinta-3); margin-bottom: 12px; }
+  .barra-fila { display: grid; grid-template-columns: minmax(150px, 230px) 1fr 84px; gap: 14px; align-items: center; padding: 7px 0; }
   .barra-fila.clic { cursor: pointer; margin: 0 -10px; padding-left: 10px; padding-right: 10px; border-radius: 8px; }
-  .barra-fila.clic:hover { background: var(--hover); }
+  .barra-fila.clic:hover { background: var(--carta-2); }
   .barra-fila.clic[aria-pressed="true"] { background: var(--carta-2); box-shadow: inset 2px 0 0 var(--tinta); }
-  .barra-fila .t { min-width: 0; font-size: 13.5px; font-weight: 500; display: flex; align-items: center; gap: 7px; }
-  .barra-fila .t .nom { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .barra-fila .t i { width: 8px; height: 8px; border-radius: 2px; flex: none; background: var(--f); }
-  .barra-fila.sub .t { font-size: 13px; font-weight: 400; color: var(--tinta-2); padding-left: 14px; }
-  .barra-fila.sub .t::before { content: "↳"; color: var(--tinta-3); flex: none; }
+  .barra-fila .nom { min-width: 0; }
+  .barra-fila .nom .t { font-size: 13.5px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: flex; align-items: center; gap: 7px; }
+  .barra-fila .nom .t i { width: 8px; height: 8px; border-radius: 2px; flex: none; background: var(--f); }
+  .barra-fila .nom .d { font-family: "Geist Mono", ui-monospace, monospace; font-size: 11px; color: var(--tinta-3); margin-top: 1px;
+                        line-height: 1.45; overflow-wrap: anywhere; }
   .barra-fila .apilada { display: flex; gap: 2px; height: 8px; min-width: 0; }
-  .barra-fila.sub .apilada { height: 6px; }
   .barra-fila .apilada i { display: block; height: 100%; background: var(--f); border-radius: 0; transition: width .6s cubic-bezier(.2,.8,.2,1); }
   .barra-fila .apilada i:last-child { border-radius: 0 4px 4px 0; }
   .barra-fila .apilada i:hover { filter: brightness(1.15); }
-  .barra-fila .nota { font-size: 12px; color: var(--tinta-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .barra-fila .val { font-family: "Geist Mono", ui-monospace, monospace; font-size: 13px; font-weight: 600; color: var(--tinta); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
-  .barra-fila.sub .val { font-weight: 400; }
-  .barra-fila .val.sin { color: var(--tinta-3); font-weight: 400; }
+  .barra-fila .val { font-family: "Geist Mono", ui-monospace, monospace; font-size: 13px; color: var(--tinta); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
 
-  #tip { position: fixed; z-index: 10; pointer-events: none; display: none; max-width: 280px;
+  #tip { position: fixed; z-index: 10; pointer-events: none; display: none; max-width: 260px;
          padding: 8px 10px; border: 1px solid var(--borde); border-radius: 8px; background: var(--carta); color: var(--tinta);
          box-shadow: 0 6px 24px rgba(0,0,0,.18); font-family: "Geist Mono", ui-monospace, monospace; font-size: 12px; line-height: 1.5; }
   #tip b { display: block; font-size: 14px; font-weight: 600; }
@@ -255,21 +247,22 @@
   .aviso { color: var(--tinta-3); font-size: 13px; padding: 8px 2px; }
   @keyframes entra { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: none } }
 
-  /* ─ pantallas angostas: una columna; la izquierda deja de ser fija ─ */
-  @media (max-width: 980px) {
-    .dos { grid-template-columns: 1fr; }
-    .izq { position: static; }
-  }
+  /* ─ móvil: la tabla colapsa a tarjetas ─ */
   @media (max-width: 720px) {
-    body { padding-left: 14px; padding-right: 14px; }
     .fijo { position: static; }
+    .tabla-cab { display: none; }
+    .tabla { margin-top: 16px; border-top: 1px solid var(--borde); border-radius: 12px; }
+    .filacta { grid-template-columns: 1fr; gap: 12px; padding: 16px 18px !important; }
+    .maqs { text-align: left; }
+    .maq .host, .maq .det { white-space: normal; }
+    .medidor .vent { display: inline; }
     .cuadros { grid-template-columns: 1fr; }
+    .cuadro, .consumo .cab, .serie, .consumo .vacio { padding-left: 18px; padding-right: 18px; }
     .cuadro + .cuadro { border-left: 0; border-top: 1px solid var(--borde-2); }
-    .cuadro, .consumo .cab, .kpis, .serie, .consumo .vacio { padding-left: 16px; padding-right: 16px; }
-    .barra-fila { grid-template-columns: minmax(80px, 120px) minmax(0, 1fr) 70px; }
-    .kpi b { font-size: 18px; }
+    .barra-fila { grid-template-columns: minmax(110px, 150px) 1fr 70px; gap: 10px; }
     .leyenda { margin-left: 0; }
-    .heroe { padding: 18px; }
+    .heroe { padding: 20px 18px; }
+    .heroe .libres { margin-left: 0; }
     .reloj { display: none; }
   }
   @media (prefers-reduced-motion: reduce) {
@@ -288,6 +281,7 @@
     <button onclick="cargar()">Refrescar</button>
   </span>
 </header>
+<div id="cabecera"></div>
 </div>
 <div id="app"><div class="aviso">Cargando…</div></div>
 <div id="tip" role="tooltip"></div>
@@ -296,7 +290,7 @@
 <script src="agregacion.js"></script>
 <script>
 const GIST_ID = "5b820c7ae6023afbfb862b25b5e4c177"; // mismo valor que reportar.py
-const VERSION = "v19"; // subir en cada cambio de UI — dispara la auto-recarga de pestañas abiertas
+const VERSION = "v20"; // subir en cada cambio de UI — dispara la auto-recarga de pestañas abiertas
 // ?estado=<url> permite previsualizar el tablero con otro estado.json (p. ej. uno local) sin tocar el gist.
 const ESTADO_URL = new URLSearchParams(location.search).get("estado");
 /* la familia del modelo va en orden fijo sobre la misma paleta categórica: Fable siempre naranja */
@@ -347,15 +341,14 @@ function mapaColores(aliases) {
   });
 })();
 
-// `corto`: solo el tiempo ("4 h 19 m"), sin el "resetea en", para donde el contexto ya lo dice.
-function cuentaRegresiva(iso, ahoraMs, viejo, corto = false) {
+function cuentaRegresiva(iso, ahoraMs, viejo) {
   if (!iso) return "";
   const s = (Date.parse(iso) - ahoraMs) / 1000;
   if (!isFinite(s)) return "";
   if (s <= 0) return viejo ? "ventana reseteada" : "reseteando…";
   const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), seg = Math.floor(s % 60);
-  const t = h >= 48 ? `${Math.floor(h / 24)} d ${h % 24} h` : h ? `${h} h ${m} m` : `${m} m ${String(seg).padStart(2, "0")} s`;
-  return corto ? t : `resetea en ${t}`;
+  if (h >= 48) { const d = Math.floor(h / 24); return `resetea en ${d} d ${h % 24} h`; }
+  return h ? `resetea en ${h} h ${m} m` : `resetea en ${m} m ${String(seg).padStart(2, "0")} s`;
 }
 
 function anchoPct(pct) {
@@ -363,39 +356,37 @@ function anchoPct(pct) {
   return isFinite(n) ? Math.min(Math.max(n, 0), 100) : 0;
 }
 
-// Color por nivel de uso: neutro hasta la mitad, ámbar a media carga, rojo pasado el 80 %.
-function colorUso(pctUsado) {
-  const n = Number(pctUsado) || 0;
-  return n > 80 ? "var(--rojo)" : n >= 50 ? "var(--amarillo)" : "var(--tinta)";
-}
-
-function barra(pct, color) {
+function barra(pct) {
   const w = anchoPct(pct);
-  return `<div class="pista"><i class="relleno" data-w="${w}" style="width:${primeraPintura ? 0 : w}%;--color-uso:${color || "var(--tinta)"}"></i></div>`;
+  return `<div class="pista"><i class="relleno" data-w="${w}" style="width:${primeraPintura ? 0 : w}%"></i></div>`;
 }
 
-function tReset(iso, viejo) {
-  return `<span class="t-reset" data-corto="1" data-reset="${esc(String(iso || ""))}" data-viejo="${viejo ? 1 : 0}"></span>`;
+function medidor(nombre, ventana, viejo, conReset = true) {
+  const critico = Number(ventana.pct) > 80;
+  return `<div class="medidor"${critico ? ' style="--color-cuenta:var(--rojo)"' : ""}>
+    <div class="fila">
+      <span class="uso"><span class="vent">${nombre}</span><b class="pct">${esc(String(ventana.pct))}%</b></span>
+      ${conReset ? `<span class="t-reset" data-reset="${esc(String(ventana.resetea || ""))}" data-viejo="${viejo ? 1 : 0}"></span>` : ""}
+    </div>
+    ${barra(ventana.pct)}
+  </div>`;
 }
 
-// Héroe: cuánto queda, no cuánto se usó.
-function libre(nombre, v) {
-  const usado = anchoPct(v.pct), queda = 100 - usado;
-  return `<div class="libre"><span class="n">${nombre}</span>${barra(queda, usado > 80 ? "var(--rojo)" : usado >= 50 ? "var(--amarillo)" : "var(--verde)")}<span class="v mono">${queda}% <em>libre</em></span></div>`;
+// Sin cuenta regresiva: el límite de Fable resetea con la ventana semanal, que ya está al lado.
+function medidorModelo(c, nombre, vieja) {
+  const lim = c.cupo && c.cupo.modelos && c.cupo.modelos[nombre];
+  return lim ? medidor(nombre, lim, vieja, false) : `<div class="sindato-txt">${c.cupo ? "—" : ""}</div>`;
 }
 
-// Lista de cuentas: cuánto se usó, en tres medidores chicos.
-function mini(nombre, v) {
-  if (!v) return `<div class="mini"><div class="pista"></div><span class="v"><em>— ${nombre}</em></span></div>`;
-  return `<div class="mini">${barra(v.pct, colorUso(v.pct))}<span class="v"><b>${esc(String(v.pct))}%</b> <em>${nombre}</em></span></div>`;
-}
-
-function chip(m) {
+function maqHtml(m) {
   const act = m.ultima_actividad;
-  const proyecto = act && act.proyecto ? `<span class="p">· ${esc(act.proyecto)}</span>` : "";
-  const viejo = m.fresco ? "" : `<span class="p">· sin reporte <span class="t-hace" data-ts="${esc(String(m.reportado))}"></span></span>`;
-  const titulo = act && isFinite(Date.parse(act.hace)) ? `${m.clave} · última actividad ${humanizar((Date.now() - Date.parse(act.hace)) / 1000)}` : m.clave;
-  return `<span class="chip ${m.fresco ? "" : "viejo"}" title="${esc(titulo)}"><i></i><span class="h">${esc(m.clave)}</span>${proyecto}${viejo}</span>`;
+  const det = act
+    ? `<span class="t-hace" data-ts="${esc(String(act.hace))}"></span> · ${esc(act.proyecto || "?")}`
+    : "sin actividad";
+  const extra = m.fresco ? "" : ` · sin reporte <span class="t-hace" data-ts="${esc(String(m.reportado))}"></span>`;
+  return `<div class="maq ${m.fresco ? "" : "viejo"}">
+    <div class="host" title="${esc(m.clave)}">${esc(m.clave)}</div><div class="det">${det}${extra}</div>
+  </div>`;
 }
 
 /* ─ consumo de tokens ─ */
@@ -414,30 +405,20 @@ function apilada(porFamilia, total, etiqueta) {
   return `<div class="apilada">${segs.join("")}</div>`;
 }
 
-// Fila de un desglose: nombre | barra | total. `clic` ("c:Alias" / "m:Clave") la vuelve un botón que
-// aplica o quita ese filtro; `sub` la sangra bajo su cuenta; sin `fila`, muestra `nota` en vez de barra.
-function filaBarra({ nombre, fila, max, familia, clic, sub, nota }) {
-  const clases = ["barra-fila", clic ? "clic" : "", sub ? "sub" : ""].filter(Boolean).join(" ");
+// `clic` (opcional): valor de filtro ("c:Alias" / "m:Clave"); la fila se vuelve un botón que lo aplica o lo quita.
+function filaBarra(nombre, detalle, fila, max, colorFamilia, clic) {
+  const ancho = max ? (fila.total / max * 100).toFixed(2) : 0;
   const boton = clic
     ? ` role="button" tabindex="0" aria-pressed="${clic === filtroATexto(filtroActivo)}" data-filtro="${esc(clic)}" onclick="filtrar(this.dataset.filtro)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();filtrar(this.dataset.filtro)}"`
     : "";
-  const swatch = familia ? `<i style="--f:${COLOR_FAMILIA[familia]}"></i>` : "";
-  let centro, val, tipNombre = "";
-  if (!fila) {
-    centro = `<span class="nota">${esc(nota || "")}</span>`;
-    val = `<div class="val sin">—</div>`;
-  } else {
-    const ancho = max ? (fila.total / max * 100).toFixed(2) : 0;
-    tipNombre = tip(humanizarTokens(fila.total), `${nombre} · ${desglose(fila)}`);
-    centro = familia
-      ? `<div class="apilada"><i style="--f:${COLOR_FAMILIA[familia]};width:${ancho}%" ${tipNombre}></i></div>`
-      : `<div style="width:${ancho}%;min-width:0">${apilada(fila.porFamilia, fila.total, nombre)}</div>`;
-    val = `<div class="val">${esc(humanizarTokens(fila.total))}</div>`;
-  }
-  return `<div class="${clases}"${boton}>
-    <div class="t" title="${esc(nombre)}" ${tipNombre}>${swatch}<span class="nom">${esc(nombre)}</span></div>
-    ${centro}
-    ${val}
+  const swatch = colorFamilia ? `<i style="--f:${COLOR_FAMILIA[colorFamilia]}"></i>` : "";
+  const barra = colorFamilia
+    ? `<div class="apilada"><i style="--f:${COLOR_FAMILIA[colorFamilia]};width:${ancho}%" ${tip(humanizarTokens(fila.total), nombre)}></i></div>`
+    : `<div style="width:${ancho}%;min-width:0">${apilada(fila.porFamilia, fila.total, nombre)}</div>`;
+  return `<div class="barra-fila${clic ? " clic" : ""}"${boton}>
+    <div class="nom"><div class="t" title="${esc(nombre)}">${swatch}<span style="min-width:0;overflow:hidden;text-overflow:ellipsis">${esc(nombre)}</span></div><div class="d" title="${esc(detalle)}">${esc(detalle)}</div></div>
+    ${barra}
+    <div class="val">${esc(humanizarTokens(fila.total))}</div>
   </div>`;
 }
 
@@ -459,22 +440,19 @@ function filtroATexto(f) {
 
 // El selector ofrece solo lo que tiene consumo en la ventana; un filtro guardado que ya no
 // aparece (compu apagado, cuenta sin uso) se descarta en vez de dejar el tablero vacío.
-function selectorFiltro(todo, arbol) {
+function selectorFiltro(todo) {
   const cuentas = todo.porCuenta.map(x => x.alias), maquinas = todo.porMaquina.map(m => m.clave);
   if (filtroActivo && !(filtroActivo.cuenta ? cuentas.includes(filtroActivo.cuenta) : maquinas.includes(filtroActivo.maquina))) {
     filtroActivo = null;
     localStorage.removeItem("consumo_filtro");
   }
   const actual = filtroATexto(filtroActivo);
-  const opcion = (v, t, off) => `<option value="${esc(v)}" ${!off && v === actual ? "selected" : ""}${off ? " disabled" : ""}>${esc(t)}</option>`;
+  const opcion = (v, t) => `<option value="${esc(v)}" ${v === actual ? "selected" : ""}>${esc(t)}</option>`;
   const grupo = (titulo, items) => items.length ? `<optgroup label="${titulo}">${items.join("")}</optgroup>` : "";
-  // Las máquinas en uso que no aportan datos se listan deshabilitadas: así se ve quién falta.
-  const sinDatos = arbol.flatMap(c => c.maquinas.filter(m => m.estado !== "datos"))
-    .map(m => opcion(`off:${m.clave}`, `${m.clave} · ${m.estado === "sin-ventana" ? "sin datos" : "sin reportero"}`, true));
   return `<select class="filtro" aria-label="Filtrar por cuenta o máquina" data-activo="${actual ? 1 : 0}" onchange="filtrar(this.value)">
     ${opcion("", "Todas")}
     ${grupo("Cuentas", cuentas.map(a => opcion(`c:${a}`, a)))}
-    ${grupo("Máquinas", [...maquinas.map(k => opcion(`m:${k}`, k)), ...sinDatos])}
+    ${grupo("Máquinas", maquinas.map(k => opcion(`m:${k}`, k)))}
   </select>`;
 }
 
@@ -487,77 +465,47 @@ function filtrar(texto) {
   if (ultimoEstado) pintar(ultimoEstado);
 }
 
-function kpi(valor, etiqueta) {
-  return `<span class="kpi"><b>${esc(valor)}</b><span>${esc(etiqueta)}</span></span>`;
-}
-
-function arbolHtml(arbol, max) {
-  return arbol.map(cta => {
-    const cuenta = cta.fila
-      ? filaBarra({ nombre: cta.alias, fila: cta.fila, max, clic: `c:${cta.alias}` })
-      : filaBarra({ nombre: cta.alias, nota: "sin datos en esta ventana" });
-    const maquinas = cta.maquinas.map(m => m.estado === "datos"
-      ? filaBarra({ nombre: m.clave, fila: m.fila, max, clic: `m:${m.clave}`, sub: true })
-      : filaBarra({ nombre: m.clave, sub: true, nota: m.estado === "sin-ventana" ? "sin datos en esta ventana" : "sin reportero actualizado" }));
-    return `<div class="grupo">${cuenta}${maquinas.join("")}</div>`;
-  }).join("");
-}
-
-function consumoHtml(estado, ahoraIso) {
+function consumoHtml(estado) {
   const hoy = hoyLocal();
   const todo = consumo(estado, hoy, ventanaDias);
-  const arbol = arbolConsumo(estado, ahoraIso, hoy, ventanaDias);
-  const selector = selectorFiltro(todo, arbol);
+  const selector = selectorFiltro(todo);
   const c = filtroActivo ? consumo(estado, hoy, ventanaDias, filtroActivo) : todo;
   const seg = `<div class="seg" role="group" aria-label="Ventana">${VENTANAS.map(([d, t]) =>
     `<button type="button" aria-pressed="${d === ventanaDias}" onclick="ventana(${d})">${t}</button>`).join("")}</div>`;
-  let html = `<section class="consumo"><div class="cab"><h2>Consumo de tokens</h2>${seg}${selector}</div>`;
-
-  // El cuadro por cuenta y máquina va siempre, con o sin datos: es el que dice quién falta por reportar.
-  const maxCuenta = todo.porCuenta.length ? todo.porCuenta[0].total : 0;
-  const cuadroArbol = ancho => `<div class="cuadro arbol${ancho ? " ancho" : ""}"><h3>Por cuenta y máquina · clic para filtrar</h3>${arbolHtml(arbol, maxCuenta)}</div>`;
-
+  const leyenda = c.porFamilia.length ? `<div class="leyenda">${c.porFamilia.map(f =>
+    `<span><i style="--f:${COLOR_FAMILIA[f.familia]}"></i>${esc(f.familia)}</span>`).join("")}</div>` : "";
+  const resumen = c.total
+    ? `<span class="resumen"><b>${esc(humanizarTokens(c.total))}</b> tokens · <b>${esc(humanizarTokens(c.salida))}</b> de salida · ${c.msgs.toLocaleString("es-CO")} msgs · ${c.porMaquina.length} ${c.porMaquina.length === 1 ? "máquina" : "máquinas"}</span>`
+    : "";
+  let html = `<section class="consumo"><div class="cab"><h2>Consumo de tokens</h2>${seg}${selector}${resumen}${leyenda}</div>`;
   if (!c.total) {
-    html += `<div class="vacio">Sin datos de consumo en esta ventana. Cada compu los publica al reportar; las máquinas marcadas "sin reportero actualizado" corren una versión vieja de reportar.py.</div>`;
-    html += `<div class="cuadros">${cuadroArbol(true)}</div></section>`;
+    html += `<div class="vacio">Sin datos de consumo en esta ventana. Cada compu los publica al reportar (hace falta el reportero actualizado).</div></section>`;
     return html;
   }
 
-  const leyenda = `<div class="leyenda">${c.porFamilia.map(f =>
-    `<span><i style="--f:${COLOR_FAMILIA[f.familia]}"></i>${esc(f.familia)}</span>`).join("")}</div>`;
-  const nMaq = c.porMaquina.length, nUso = arbol.reduce((n, cta) => n + cta.maquinas.length, 0);
-  html += `<div class="kpis">
-    ${kpi(humanizarTokens(c.total), "tokens")}
-    ${kpi(humanizarTokens(c.salida), "de salida")}
-    ${kpi(c.msgs.toLocaleString("es-CO"), "msgs")}
-    ${kpi(String(nMaq), nUso > nMaq ? `de ${nUso} máquinas` : nMaq === 1 ? "máquina" : "máquinas")}
-    ${leyenda}
-  </div>`;
-
-  /* serie por día: columnas apiladas por familia, con eje y en dos líneas de referencia */
+  /* serie por día: columnas apiladas por familia; solo el máximo lleva su valor encima */
   if (c.porDia.length > 1) {
     const max = Math.max(...c.porDia.map(d => d.total));
-    html += `<div class="serie"><div class="lienzo">
-      <div class="ejey"><span>${esc(humanizarTokens(max))}</span><span>${esc(humanizarTokens(max / 2))}</span><span>0</span></div>
-      <div class="cols">${c.porDia.map(d => {
-        const fecha = new Date(d.dia + "T12:00:00");
-        const etiqueta = fecha.toLocaleDateString("es-CO", { weekday: "short", day: "numeric", month: "short" });
-        const segs = FAMILIAS.filter(f => d.porFamilia[f]).map(f =>
-          `<i style="--f:${COLOR_FAMILIA[f]};height:${(d.porFamilia[f] / max * 100).toFixed(2)}%"></i>`).join("");
-        const cima = d.dia === hoy && d.total ? `<span class="cima">${esc(humanizarTokens(d.total))}</span>` : "";
-        const detalle = FAMILIAS.filter(f => d.porFamilia[f]).map(f => `${f} ${humanizarTokens(d.porFamilia[f])}`).join(" · ") || "sin uso";
-        return `<div class="col" tabindex="0" ${tip(humanizarTokens(d.total), `${etiqueta} · ${detalle}`)}>${cima}${segs}</div>`;
-      }).join("")}</div>
-      <span></span>
-      <div class="eje">${c.porDia.map(d => `<span class="${d.dia === hoy ? "hoy" : ""}">${d.dia === hoy ? "hoy" : new Date(d.dia + "T12:00:00").getDate()}</span>`).join("")}</div>
-    </div></div>`;
+    const iMax = c.porDia.findIndex(d => d.total === max);
+    html += `<div class="serie"><div class="cols">${c.porDia.map((d, i) => {
+      const fecha = new Date(d.dia + "T12:00:00");
+      const etiqueta = fecha.toLocaleDateString("es-CO", { weekday: "short", day: "numeric", month: "short" });
+      const segs = FAMILIAS.filter(f => d.porFamilia[f]).map(f =>
+        `<i style="--f:${COLOR_FAMILIA[f]};height:${(d.porFamilia[f] / max * 100).toFixed(2)}%"></i>`).join("");
+      const cima = (i === iMax || d.dia === hoy) && d.total ? `<span class="cima">${esc(humanizarTokens(d.total))}</span>` : "";
+      const detalle = FAMILIAS.filter(f => d.porFamilia[f]).map(f => `${f} ${humanizarTokens(d.porFamilia[f])}`).join(" · ") || "sin uso";
+      return `<div class="col" tabindex="0" ${tip(humanizarTokens(d.total), `${etiqueta} · ${detalle}`)}>${cima}${segs}</div>`;
+    }).join("")}</div>
+    <div class="eje">${c.porDia.map(d => `<span class="${d.dia === hoy ? "hoy" : ""}">${new Date(d.dia + "T12:00:00").getDate()}</span>`).join("")}</div></div>`;
   }
 
-  const maxModelo = c.porModelo[0].total;
+  // Por máquina es el dato de origen (cada compu publica el suyo); por cuenta es derivado:
+  // suma las máquinas que hoy están en esa cuenta.
+  const maxModelo = c.porModelo[0].total, maxCuenta = c.porCuenta[0].total, maxMaq = c.porMaquina[0].total;
   html += `<div class="cuadros">
-    <div class="cuadro"><h3>Por modelo</h3>${c.porModelo.map(m => filaBarra({ nombre: m.nombre, fila: m, max: maxModelo, familia: m.familia })).join("")}
-      <div class="pista-nota">Pasa el cursor por un nombre o una barra para ver salida, entrada, caché y mensajes.</div></div>
-    ${cuadroArbol(false)}
+    <div class="cuadro"><h3>Por modelo</h3>${c.porModelo.map(m => filaBarra(m.nombre, desglose(m), m, maxModelo, m.familia)).join("")}</div>
+    <div class="cuadro"><h3>Por cuenta</h3>${c.porCuenta.map(x => filaBarra(x.alias, desglose(x), x, maxCuenta, null, `c:${x.alias}`)).join("")}</div>
+    <div class="cuadro ancho"><h3>Por máquina</h3>${c.porMaquina.map(m => filaBarra(m.clave, `${m.cuenta || SIN_SESION} · ${desglose(m)}`, m, maxMaq, null, `m:${m.clave}`)).join("")}</div>
   </div></section>`;
   return html;
 }
@@ -594,59 +542,62 @@ function ventana(dias) {
 
 function pintar(estado) {
   const ahoraMs = Date.now();
-  const ahoraIso = new Date(ahoraMs).toISOString();
-  const agg = agregar(estado, ahoraIso);
+  const agg = agregar(estado, new Date(ahoraMs).toISOString());
   const colores = mapaColores(agg.cuentas.map(c => c.alias));
-  let izq = "";
+  let cabecera = "", html = "";
 
-  /* héroe: la respuesta y cuánto queda */
+  /* héroe */
   const r = agg.recomendada;
   if (r === null) {
-    izq += `<div class="heroe"><div><div class="miga">Usa ahora</div>
+    cabecera += `<div class="heroe"><div><div class="miga">→ Usa</div>
       <div class="alias-grande">Sin dato de cupo</div>
       <div class="sub">ninguna cuenta tiene medición todavía</div></div></div>`;
   } else {
     const c = agg.cuentas.find(x => x.alias === r.alias);
-    const sem = c && c.semaforo ? COLOR[c.semaforo] : "var(--borde)";
+    const glow = c && c.semaforo ? COLOR[c.semaforo] : "transparent";
     const nota = r.dato_de_hace_s > FRESCO_S ? ` · con dato de ${humanizar(r.dato_de_hace_s)}` : "";
     const sub = c && c.cupo
-      ? `sesión resetea en <b>${tReset(c.cupo.cinco_horas.resetea, !c.fresco)}</b> · semana en <b>${tReset(c.cupo.semanal.resetea, !c.fresco)}</b>${nota}`
+      ? `<span class="t-reset" data-reset="${esc(String(c.cupo.cinco_horas.resetea || ""))}" data-viejo="${c.fresco ? 0 : 1}"></span>${nota}`
       : "";
     const libres = c && c.cupo ? `<div class="libres">
-        ${libre("Sesión · 5 h", c.cupo.cinco_horas)}
-        ${c.cupo.modelos && c.cupo.modelos.Fable ? libre("Fable · semanal", c.cupo.modelos.Fable) : ""}
-        ${libre("Semana", c.cupo.semanal)}
+        <div><div class="fila"><span>5 h libre</span><b>${esc(String(100 - c.cupo.cinco_horas.pct))}%</b></div>${barra(100 - c.cupo.cinco_horas.pct)}</div>
+        ${c.cupo.modelos && c.cupo.modelos.Fable ? `<div><div class="fila"><span>Fable libre</span><b>${esc(String(100 - c.cupo.modelos.Fable.pct))}%</b></div>${barra(100 - c.cupo.modelos.Fable.pct)}</div>` : ""}
+        <div><div class="fila"><span>semana libre</span><b>${esc(String(100 - c.cupo.semanal.pct))}%</b></div>${barra(100 - c.cupo.semanal.pct)}</div>
       </div>` : "";
-    izq += `<div class="heroe" style="--sem:${sem}"><div style="min-width:0">
-      <div class="miga">Usa ahora</div>
+    cabecera += `<div class="heroe" style="--glow:${glow};--color-cuenta:${colores[r.alias] || "var(--tinta)"}"><div style="min-width:0">
+      <div class="miga">→ Usa</div>
       <div class="alias-grande">${esc(r.alias)}</div>
       <div class="sub">${sub}</div></div>${libres}</div>`;
   }
 
-  /* lista de cuentas: cuánto se usó */
-  izq += `<div class="lista-cab"><b>Todas las cuentas</b><span>% usado · sesión / Fable / semana</span></div><div class="tabla">`;
+  /* tabla de cuentas */
+  cabecera += `<div class="tabla-cab"><div class="thead"><span>Cuenta</span><span>Sesión · 5 h</span><span>Fable · semanal</span><span>Semanal</span><span>Máquinas</span></div></div>`;
+  html += `<div class="tabla">`;
   agg.cuentas.forEach((c, i) => {
     const vieja = c.cupo && !c.fresco;
     const agotada = c.semaforo === "rojo" && c.score >= 99;
-    const rec = r && r.alias === c.alias;
-    const nombreEstado = c.cupo ? (agotada ? "agotada" : (c.semaforo === "rojo" ? "por agotarse" : ETIQUETA[c.semaforo])) : "cupo desconocido";
+    const nombreEstado = c.cupo ? (agotada ? "agotada" : (c.semaforo === "rojo" ? "por agotarse" : ETIQUETA[c.semaforo])) : null;
+    const etiq = c.cupo
+      ? `${nombreEstado}${vieja ? `<span class="etiq-dato">dato de <span class="t-hace" data-ts="${esc(String(c.medido))}"></span></span>` : ""}`
+      : "cupo desconocido";
+    const maqs = c.maquinas.length ? c.maquinas.map(maqHtml).join("") : `<div class="maq"><div class="det">—</div></div>`;
     const alarma = agotada ? "alerta" : (c.semaforo === "rojo" ? "aviso" : (c.semaforo === "amarillo" ? "ojo" : (c.semaforo === "verde" ? "ok" : "")));
-    const dato = vieja ? `<span class="etiq-dato">dato de <span class="t-hace" data-ts="${esc(String(c.medido))}"></span></span>` : "";
-    const resets = c.cupo ? `<span class="resets">sesión ${tReset(c.cupo.cinco_horas.resetea, vieja)} · semana ${tReset(c.cupo.semanal.resetea, vieja)}</span>` : "";
-    const minis = c.cupo
-      ? `<div class="minis">${mini("sesión", c.cupo.cinco_horas)}${mini("Fable", c.cupo.modelos && c.cupo.modelos.Fable)}${mini("semana", c.cupo.semanal)}</div>`
-      : `<div class="sindato-txt">sin medición — se llena cuando un compu entre a esta cuenta</div>`;
-    const chips = c.maquinas.length ? `<div class="chips">${c.maquinas.map(chip).join("")}</div>` : `<div class="sinmaq">sin máquinas ahora</div>`;
-    izq += `<div class="filacta ${vieja ? "vieja" : ""} ${alarma} ${rec ? "rec" : ""}" style="--color-cuenta:${colores[c.alias]};animation-delay:${.1 + i * .06}s">
-      <div class="cta-id"><span class="punto"></span><span class="alias">${esc(c.alias)}</span><span class="pill">${nombreEstado}${rec ? " · recomendada" : ""}</span>${dato}${resets}</div>
-      ${minis}${chips}
+    html += `<div class="filacta ${vieja ? "vieja" : ""} ${alarma}" style="--color-cuenta:${colores[c.alias]};animation-delay:${.1 + i * .06}s">
+      <div class="cta-id"><span class="punto"></span><span style="min-width:0">
+        <span class="alias">${esc(c.alias)}</span><br><span class="etiq">${etiq}</span></span></div>
+      ${c.cupo ? medidor("sesión", c.cupo.cinco_horas, vieja) : `<div class="sindato-txt">sin medición — se llena cuando un compu entre a esta cuenta</div>`}
+      ${medidorModelo(c, "Fable", vieja)}
+      ${c.cupo ? medidor("semanal", c.cupo.semanal, vieja) : `<div class="sindato-txt"></div>`}
+      <div class="maqs">${maqs}</div>
     </div>`;
   });
-  izq += `</div>`;
+  html += `</div>`;
+
+  html += consumoHtml(estado);
 
   /* sin sesión */
   if (agg.sin_sesion.length) {
-    izq += `<div class="sinsesion"><div class="cab">Sin sesión</div>
+    html += `<div class="sinsesion"><div class="cab">Sin sesión</div>
       ${agg.sin_sesion.map(m => {
         const act = m.ultima_actividad;
         const det = act
@@ -657,13 +608,11 @@ function pintar(estado) {
       }).join("")}</div>`;
   }
 
-  const html = `<div class="dos"><aside class="izq">${izq}</aside>${consumoHtml(estado, ahoraIso)}</div>`;
-
   const agotadas = agg.cuentas.filter(c => c.semaforo === "rojo").length;
   document.title = (agotadas ? "🔴 " : "") + "Cuentas Claude";
 
+  document.getElementById("cabecera").innerHTML = cabecera;
   document.getElementById("app").innerHTML = html;
-  ajustarColumna();
   if (primeraPintura) {
     requestAnimationFrame(() => requestAnimationFrame(() => {
       document.querySelectorAll(".relleno[data-w]").forEach(el => { el.style.width = el.dataset.w + "%"; });
@@ -673,14 +622,6 @@ function pintar(estado) {
   tictac();
 }
 
-// La columna del cupo se queda fija al hacer scroll solo si cabe entera; si hay muchas cuentas,
-// fluye con la página para que nada quede cortado.
-function ajustarColumna() {
-  const izq = document.querySelector(".izq");
-  if (izq) izq.classList.toggle("suelta", izq.scrollHeight > innerHeight - 88);
-}
-addEventListener("resize", ajustarColumna);
-
 /* la firma: el tablero late — relojes vivos cada segundo, sin re-fetch */
 function tictac() {
   const ahoraMs = Date.now();
@@ -689,7 +630,7 @@ function tictac() {
     if (isFinite(t)) el.textContent = humanizar((ahoraMs - t) / 1000);
   });
   document.querySelectorAll(".t-reset").forEach(el => {
-    el.textContent = cuentaRegresiva(el.dataset.reset, ahoraMs, el.dataset.viejo === "1", el.dataset.corto === "1");
+    el.textContent = cuentaRegresiva(el.dataset.reset, ahoraMs, el.dataset.viejo === "1");
   });
   document.getElementById("reloj").textContent =
     new Date(ahoraMs).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit", second: "2-digit" });

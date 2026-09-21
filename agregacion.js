@@ -187,41 +187,6 @@ function consumo(estado, hoy, dias, filtro) {
   };
 }
 
-// Cuadro "Por cuenta y máquina": cada cuenta con sus máquinas, incluidas las que están en uso
-// pero no publican consumo, para que se vea quién falta por actualizar el reportero.
-// Estado de cada máquina: "datos" (consumo en la ventana), "sin-ventana" (publica, pero nada en
-// estos días) o "sin-reportero" (versión vieja de reportar.py). Orden: cuentas con datos de mayor
-// a menor, luego el resto como las ordena `agregar`, y "sin sesión" al final.
-function arbolConsumo(estado, ahora, hoy, dias) {
-  const todo = consumo(estado, hoy, dias);
-  const agg = agregar(estado, ahora);
-  const porCuenta = Object.fromEntries(todo.porCuenta.map(c => [c.alias, c]));
-  const porMaquina = Object.fromEntries(todo.porMaquina.map(m => [m.clave, m]));
-  const maquinasDe = {};
-  const anotar = (alias, clave) => {
-    const lista = maquinasDe[alias] = maquinasDe[alias] || [];
-    if (!lista.includes(clave)) lista.push(clave);
-  };
-  for (const c of agg.cuentas) for (const m of c.maquinas) anotar(c.alias, m.clave);
-  for (const m of agg.sin_sesion) anotar(SIN_SESION, m.clave);
-  for (const m of todo.porMaquina) anotar(m.cuenta || SIN_SESION, m.clave);
-
-  const estadoDe = clave => porMaquina[clave] ? "datos"
-    : ((estado.maquinas || {})[clave] || {}).consumo ? "sin-ventana" : "sin-reportero";
-  const aliases = [...new Set([
-    ...todo.porCuenta.map(c => c.alias),
-    ...agg.cuentas.map(c => c.alias).filter(a => (maquinasDe[a] || []).length),
-    ...(maquinasDe[SIN_SESION] ? [SIN_SESION] : []),
-  ])];
-  return aliases.map(alias => ({
-    alias,
-    fila: porCuenta[alias] || null,
-    maquinas: (maquinasDe[alias] || [])
-      .sort((a, b) => ((porMaquina[b] || {}).total || 0) - ((porMaquina[a] || {}).total || 0) || a.localeCompare(b))
-      .map(clave => ({ clave, fila: porMaquina[clave] || null, estado: estadoDe(clave) })),
-  }));
-}
-
 // 950 → "950"; 12345 → "12 k"; 4200000 → "4,2 M"; 2.4e9 → "2,4 mil M". Un decimal solo bajo 10; coma decimal es-CO.
 function humanizarTokens(n) {
   n = Number(n) || 0;
@@ -233,5 +198,5 @@ function humanizarTokens(n) {
 }
 
 if (typeof module !== "undefined") module.exports = {
-  agregar, humanizar, consumo, arbolConsumo, humanizarTokens, familiaModelo, nombreModelo, FAMILIAS, SIN_SESION, FRESCO_S, EN_USO_S,
+  agregar, humanizar, consumo, humanizarTokens, familiaModelo, nombreModelo, FAMILIAS, SIN_SESION, FRESCO_S, EN_USO_S,
 };
