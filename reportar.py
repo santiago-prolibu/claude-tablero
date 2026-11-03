@@ -185,7 +185,11 @@ def parsear_cupo(uso):
             return round(float(ventana["utilization"]))
 
         cupo = {
-            "cinco_horas": {"pct": pct(fh), "resetea": fh.get("resets_at")},
+            # Hay cuentas a las que la API ya no les manda el límite de sesión
+            # (tests/fixtures/uso_sin_sesion.json). `pct` sigue siendo un número porque el gist es
+            # compartido y los `cuentas` y las pestañas ya instalados lo leen sin proteger.
+            "cinco_horas": ({"pct": 0, "resetea": None, "no_reportado": True} if fh is None
+                            else {"pct": pct(fh), "resetea": fh.get("resets_at")}),
             "semanal": {"pct": pct(sd), "resetea": sd.get("resets_at")},
         }
     except (KeyError, TypeError, ValueError):
@@ -290,6 +294,10 @@ def main(dry_run=False):
     clave, cuenta, actividad, cupo, consumo = armar_reporte(
         claude_json, Path.home() / ".claude" / "projects",
         _scutil_localhostname(), hostname_s, uso, ahora)
+    if uso is not None and cuenta and not cupo:
+        # Sin esto el reporte sale `ok … cupo=no` y la cuota se congela sin dejar rastro.
+        presentes = sorted(k for k, v in uso.items() if v is not None) if isinstance(uso, dict) else []
+        _log(f"uso sin cupo legible; claves con dato: {presentes}")
     pat = TOKEN_PATH.read_text().strip() if TOKEN_PATH.exists() else None
     if not pat:
         _log("sin PAT; abortando")

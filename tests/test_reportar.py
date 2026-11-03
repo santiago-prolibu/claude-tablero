@@ -1,5 +1,6 @@
 import json, os, sys, tempfile, time, unittest
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import reportar
@@ -156,6 +157,39 @@ class TestParsearCupo(unittest.TestCase):
         self.assertIsNone(reportar.parsear_cupo({}))
         self.assertIsNone(reportar.parsear_cupo({"error": "x"}))
 
+    def _sin_sesion(self):
+        p = Path(__file__).parent / "fixtures" / "uso_sin_sesion.json"
+        return json.loads(p.read_text())
+
+    def test_sin_limite_de_sesion_conserva_semanal_y_fable(self):
+        # Respuesta real (nov 2026): `five_hour: null` y sin `session` en `limits`.
+        cupo = reportar.parsear_cupo(self._sin_sesion())
+        self.assertEqual(cupo["semanal"]["pct"], 11)
+        self.assertEqual(cupo["modelos"]["Fable"]["pct"], 5)
+
+    def test_sin_limite_de_sesion_marca_la_ventana(self):
+        # La ventana sigue existiendo con pct numerico: el gist es compartido y los `cuentas` y
+        # las pestanas ya instalados leen `cinco_horas.pct` sin proteger.
+        cupo = reportar.parsear_cupo(self._sin_sesion())
+        self.assertEqual(cupo["cinco_horas"], {"pct": 0, "resetea": None, "no_reportado": True})
+
+    def test_clave_five_hour_ausente_no_se_confunde_con_no_reportada(self):
+        # Solo el null observado significa «no reportado». Si la API renombra el campo, la respuesta
+        # es ilegible y queda en el log: tomarla por «sin sesión» escondería el cambio.
+        uso = self._sin_sesion()
+        del uso["five_hour"]
+        self.assertIsNone(reportar.parsear_cupo(uso))
+
+    def test_con_limite_de_sesion_no_lleva_la_marca(self):
+        self.assertNotIn("no_reportado", reportar.parsear_cupo(self._fixture())["cinco_horas"])
+
+    def test_ventanas_malformadas_siguen_dando_none(self):
+        uso = self._sin_sesion()
+        uso["five_hour"] = {}
+        self.assertIsNone(reportar.parsear_cupo(uso))
+        self.assertIsNone(reportar.parsear_cupo({"five_hour": None, "seven_day": None}))
+        self.assertIsNone(reportar.parsear_cupo({"five_hour": None}))
+
     def test_limite_semanal_de_fable(self):
         # El fixture trae un `weekly_scoped` con scope.model.display_name = Fable al 17 %.
         cupo = reportar.parsear_cupo(self._fixture())
@@ -281,6 +315,38 @@ class TestFusionarConsumo(unittest.TestCase):
         e = reportar.fusionar(e, "Otro", None, None, None, "2026-08-11T18:00:00Z")
         self.assertNotIn("consumo", e["maquinas"]["Otro"])
         self.assertEqual(e["maquinas"]["Mini"]["consumo"], {"dias": consumo})  # no pisa a los demás
+
+
+class TestMainRegistraCupoIlegible(unittest.TestCase):
+    def _correr(self, uso, cupo, cuenta="Alpha"):
+        reporte = ("Mini", cuenta, None, cupo, {})
+        with mock.patch.object(reportar, "leer_token_anthropic", return_value="t"), \
+                mock.patch.object(reportar, "consultar_uso", return_value=uso), \
+                mock.patch.object(reportar, "armar_reporte", return_value=reporte), \
+                mock.patch.object(reportar, "gist_get", return_value={}), \
+                mock.patch.object(reportar, "gist_patch"), \
+                mock.patch.object(reportar.TOKEN_PATH.__class__, "exists", return_value=True), \
+                mock.patch.object(reportar.TOKEN_PATH.__class__, "read_text", return_value="{}"), \
+                mock.patch.object(reportar, "_log") as log:
+            reportar.main()
+        return [c.args[0] for c in log.call_args_list]
+
+    def test_respuesta_sin_cupo_legible_deja_el_motivo_en_el_log(self):
+        lineas = self._correr({"seven_day": None, "limits": [], "otra": None}, None)
+        self.assertTrue(any(l.startswith("uso sin cupo legible") and "limits" in l for l in lineas), lineas)
+
+    def test_respuesta_que_no_es_objeto_no_tumba_el_reporte(self):
+        lineas = self._correr(["x"], None)
+        self.assertTrue(any(l.startswith("uso sin cupo legible") for l in lineas), lineas)
+        self.assertTrue(any(l.startswith("ok ") for l in lineas), lineas)
+
+    def test_sin_sesion_local_no_acusa_a_la_api(self):
+        lineas = self._correr({"seven_day": {}}, None, cuenta=None)
+        self.assertFalse(any("sin cupo" in l for l in lineas), lineas)
+
+    def test_cupo_legible_no_agrega_ruido(self):
+        lineas = self._correr({"seven_day": {}}, {"semanal": {"pct": 1}})
+        self.assertFalse(any("sin cupo" in l for l in lineas), lineas)
 
 
 class TestArmarReporte(unittest.TestCase):

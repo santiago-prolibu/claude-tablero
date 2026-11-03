@@ -290,7 +290,7 @@
 <script src="agregacion.js"></script>
 <script>
 const GIST_ID = "5b820c7ae6023afbfb862b25b5e4c177"; // mismo valor que reportar.py
-const VERSION = "v20"; // subir en cada cambio de UI — dispara la auto-recarga de pestañas abiertas
+const VERSION = "v21"; // subir en cada cambio de UI — dispara la auto-recarga de pestañas abiertas
 // ?estado=<url> permite previsualizar el tablero con otro estado.json (p. ej. uno local) sin tocar el gist.
 const ESTADO_URL = new URLSearchParams(location.search).get("estado");
 /* la familia del modelo va en orden fijo sobre la misma paleta categórica: Fable siempre naranja */
@@ -370,6 +370,12 @@ function medidor(nombre, ventana, viejo, conReset = true) {
     </div>
     ${barra(ventana.pct)}
   </div>`;
+}
+
+// Hay cuentas a las que la API ya no les manda el límite de sesión: su `pct` es un 0 de relleno y no se pinta.
+function medidorSesion(ventana, viejo) {
+  if (!ventana.no_reportado) return medidor("sesión", ventana, viejo);
+  return `<div class="medidor"><div class="fila"><span class="uso"><span class="vent">sesión</span><span class="sindato-txt">no reportado</span></span></div></div>`;
 }
 
 // Sin cuenta regresiva: el límite de Fable resetea con la ventana semanal, que ya está al lado.
@@ -556,11 +562,13 @@ function pintar(estado) {
     const c = agg.cuentas.find(x => x.alias === r.alias);
     const glow = c && c.semaforo ? COLOR[c.semaforo] : "transparent";
     const nota = r.dato_de_hace_s > FRESCO_S ? ` · con dato de ${humanizar(r.dato_de_hace_s)}` : "";
+    const sinSesion = c && c.cupo && c.cupo.cinco_horas.no_reportado;
+    const proximoReset = c && c.cupo && (sinSesion ? c.cupo.semanal : c.cupo.cinco_horas).resetea;
     const sub = c && c.cupo
-      ? `<span class="t-reset" data-reset="${esc(String(c.cupo.cinco_horas.resetea || ""))}" data-viejo="${c.fresco ? 0 : 1}"></span>${nota}`
+      ? `${sinSesion ? "semana · " : ""}<span class="t-reset" data-reset="${esc(String(proximoReset || ""))}" data-viejo="${c.fresco ? 0 : 1}"></span>${nota}`
       : "";
     const libres = c && c.cupo ? `<div class="libres">
-        <div><div class="fila"><span>5 h libre</span><b>${esc(String(100 - c.cupo.cinco_horas.pct))}%</b></div>${barra(100 - c.cupo.cinco_horas.pct)}</div>
+        ${sinSesion ? `<div><div class="fila"><span>5 h</span><span>no reportado</span></div></div>` : `<div><div class="fila"><span>5 h libre</span><b>${esc(String(100 - c.cupo.cinco_horas.pct))}%</b></div>${barra(100 - c.cupo.cinco_horas.pct)}</div>`}
         ${c.cupo.modelos && c.cupo.modelos.Fable ? `<div><div class="fila"><span>Fable libre</span><b>${esc(String(100 - c.cupo.modelos.Fable.pct))}%</b></div>${barra(100 - c.cupo.modelos.Fable.pct)}</div>` : ""}
         <div><div class="fila"><span>semana libre</span><b>${esc(String(100 - c.cupo.semanal.pct))}%</b></div>${barra(100 - c.cupo.semanal.pct)}</div>
       </div>` : "";
@@ -585,7 +593,7 @@ function pintar(estado) {
     html += `<div class="filacta ${vieja ? "vieja" : ""} ${alarma}" style="--color-cuenta:${colores[c.alias]};animation-delay:${.1 + i * .06}s">
       <div class="cta-id"><span class="punto"></span><span style="min-width:0">
         <span class="alias">${esc(c.alias)}</span><br><span class="etiq">${etiq}</span></span></div>
-      ${c.cupo ? medidor("sesión", c.cupo.cinco_horas, vieja) : `<div class="sindato-txt">sin medición — se llena cuando un compu entre a esta cuenta</div>`}
+      ${c.cupo ? medidorSesion(c.cupo.cinco_horas, vieja) : `<div class="sindato-txt">sin medición — se llena cuando un compu entre a esta cuenta</div>`}
       ${medidorModelo(c, "Fable", vieja)}
       ${c.cupo ? medidor("semanal", c.cupo.semanal, vieja) : `<div class="sindato-txt"></div>`}
       <div class="maqs">${maqs}</div>

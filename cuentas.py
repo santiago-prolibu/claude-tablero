@@ -33,6 +33,12 @@ def _en_uso(ahora, m):
         return False
 
 
+def _sesion_para_desempate(c):
+    """El `pct` de una sesión no reportada es un 0 de relleno: en un empate no le gana a una medida."""
+    ventana = c["cupo"]["cinco_horas"]
+    return float("inf") if ventana.get("no_reportado") else ventana["pct"]
+
+
 def agregar(estado, ahora):
     maquinas = {k: m for k, m in (estado.get("maquinas") or {}).items() if _en_uso(ahora, m)}
     cupos = estado.get("cuentas") or {}
@@ -60,7 +66,7 @@ def agregar(estado, ahora):
     pool = frescas or con_cupo
     recomendada = None
     if pool:
-        elegida = min(pool, key=lambda c: (c["score"], c["cupo"]["cinco_horas"]["pct"]))
+        elegida = min(pool, key=lambda c: (c["score"], _sesion_para_desempate(c)))
         recomendada = {"alias": elegida["alias"],
                        "dato_de_hace_s": 0 if elegida["fresco"] else _edad(ahora, elegida["medido"])}
 
@@ -92,8 +98,9 @@ def render(agregado, ahora):
     for c in agregado["cuentas"]:
         if c["cupo"]:
             f5, fs = c["cupo"]["cinco_horas"], c["cupo"]["semanal"]
-            cupo_txt = (f"5h {_barra(f5['pct'])} {f5['pct']:3d}%  "
-                        f"sem {_barra(fs['pct'])} {fs['pct']:3d}%")
+            sesion = (f"{'5h no reportado':<18}" if f5.get("no_reportado")
+                      else f"5h {_barra(f5['pct'])} {f5['pct']:3d}%")
+            cupo_txt = f"{sesion}  sem {_barra(fs['pct'])} {fs['pct']:3d}%"
             fab = (c["cupo"].get("modelos") or {}).get("Fable")
             if fab:  # límite semanal propio de Fable, aparte del general
                 cupo_txt += f"  fab {_barra(fab['pct'])} {fab['pct']:3d}%"

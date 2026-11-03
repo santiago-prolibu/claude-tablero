@@ -264,3 +264,23 @@ test("humanizarTokens", () => {
   assert.equal(humanizarTokens(2.4e9), "2,4 mil M");
   assert.equal(humanizarTokens(undefined), "0");
 });
+
+test("sesión no reportada: el score sale del semanal y la marca sobrevive", () => {
+  const estado = { maquinas: {}, cuentas: {
+    Alpha: { cinco_horas: { pct: 0, resetea: null, no_reportado: true }, semanal: { pct: 11, resetea: "2026-08-14T13:00:00Z" }, medido: "2026-08-11T17:59:00Z" },
+    Zeta: { cinco_horas: { pct: 4, resetea: "2026-08-11T19:00:00Z" }, semanal: { pct: 2, resetea: "2026-08-14T13:00:00Z" }, medido: "2026-08-11T17:59:00Z" },
+  } };
+  const agg = agregar(estado, "2026-08-11T18:00:00Z");
+  const alpha = agg.cuentas.find(c => c.alias === "Alpha");
+  assert.equal(alpha.score, 11);
+  assert.equal(alpha.cupo.cinco_horas.no_reportado, true);
+  assert.equal(agg.recomendada.alias, "Zeta");
+});
+
+test("sesión no reportada: en un empate gana la sesión medida", () => {
+  const estado = { maquinas: {}, cuentas: {
+    Alpha: { cinco_horas: { pct: 0, resetea: null, no_reportado: true }, semanal: { pct: 11, resetea: null }, medido: "2026-08-11T17:59:00Z" },
+    Zeta: { cinco_horas: { pct: 5, resetea: null }, semanal: { pct: 11, resetea: null }, medido: "2026-08-11T17:59:00Z" },
+  } };
+  assert.equal(agregar(estado, "2026-08-11T18:00:00Z").recomendada.alias, "Zeta");
+});
