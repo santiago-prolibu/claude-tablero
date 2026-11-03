@@ -154,5 +154,42 @@ class TestRender(unittest.TestCase):
         self.assertIn("Sin dato de cupo", cuentas.render(agg, AHORA))
 
 
+class TestSesionNoReportada(unittest.TestCase):
+    def _estado(self):
+        return {"maquinas": {}, "cuentas": {
+            "Alpha": {"cinco_horas": {"pct": 0, "resetea": None, "no_reportado": True},
+                      "semanal": {"pct": 11, "resetea": "2026-08-14T13:00:00Z"},
+                      "medido": "2026-08-11T17:59:00Z"},
+            "Zeta": {"cinco_horas": {"pct": 4, "resetea": "2026-08-11T19:00:00Z"},
+                     "semanal": {"pct": 2, "resetea": "2026-08-14T13:00:00Z"},
+                     "medido": "2026-08-11T17:59:00Z"}}}
+
+    def test_el_score_sale_del_semanal(self):
+        agregado = cuentas.agregar(self._estado(), AHORA)
+        alpha = next(c for c in agregado["cuentas"] if c["alias"] == "Alpha")
+        self.assertEqual(alpha["score"], 11)
+        self.assertEqual(agregado["recomendada"]["alias"], "Zeta")
+
+    def test_en_un_empate_gana_la_sesion_medida(self):
+        estado = self._estado()
+        estado["cuentas"]["Zeta"]["semanal"]["pct"] = 11
+        estado["cuentas"]["Zeta"]["cinco_horas"]["pct"] = 5
+        self.assertEqual(cuentas.agregar(estado, AHORA)["recomendada"]["alias"], "Zeta")
+
+    def test_las_columnas_quedan_alineadas(self):
+        filas = cuentas.render(cuentas.agregar(self._estado(), AHORA), AHORA).splitlines()
+        alpha = next(f for f in filas if "Alpha" in f)
+        zeta = next(f for f in filas if "Zeta" in f)
+        self.assertEqual(alpha.index(" sem "), zeta.index(" sem "))
+
+    def test_render_no_pinta_un_cero_falso(self):
+        filas = cuentas.render(cuentas.agregar(self._estado(), AHORA), AHORA).splitlines()
+        alpha = next(f for f in filas if "Alpha" in f)
+        self.assertIn("5h no reportado", alpha)
+        self.assertNotIn("0%  sem", alpha)
+        self.assertIn(" 11%", alpha)
+        self.assertIn("4%", next(f for f in filas if "Zeta" in f))
+
+
 if __name__ == "__main__":
     unittest.main()

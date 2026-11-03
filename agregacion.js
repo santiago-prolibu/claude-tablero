@@ -18,6 +18,11 @@ function semaforo(score) {
   return score < 50 ? "verde" : score <= 80 ? "amarillo" : "rojo";
 }
 
+// El `pct` de una sesión no reportada es un 0 de relleno: en un empate no le gana a una sesión medida.
+function sesionParaDesempate(c) {
+  return c.cupo.cinco_horas.no_reportado ? Infinity : c.cupo.cinco_horas.pct;
+}
+
 function agregar(estado, ahora) {
   const maquinas = Object.fromEntries(
     Object.entries(estado.maquinas || {}).filter(([, m]) => enUso(ahora, m)));
@@ -52,7 +57,7 @@ function agregar(estado, ahora) {
   let recomendada = null;
   if (pool.length) {
     const elegida = [...pool].sort((a, b) =>
-      a.score - b.score || a.cupo.cinco_horas.pct - b.cupo.cinco_horas.pct)[0];
+      a.score - b.score || sesionParaDesempate(a) - sesionParaDesempate(b))[0];
     recomendada = {
       alias: elegida.alias,
       dato_de_hace_s: elegida.fresco ? 0 : edad(ahora, elegida.medido),

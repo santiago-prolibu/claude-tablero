@@ -26,6 +26,19 @@ semanal de Fable), la última actividad y los tokens por día y modelo de los
 (`estado.json`). La página y el comando `cuentas` leen ese gist. Diseño
 completo en `docs/superpowers/specs/`.
 
+Si la API no manda el límite de 5 h de una cuenta (`five_hour: null`), el
+reporte guarda `cinco_horas: { pct: 0, resetea: null, no_reportado: true }`:
+se pinta «no reportado» y la cuenta se ordena por su semanal. El `pct` sigue
+siendo un número para no romper los `cuentas` ya instalados, que leen el mismo
+gist (uno viejo muestra 0 % hasta actualizarlo). Una respuesta que no se pueda
+interpretar deja `uso sin cupo legible` en `~/.claude-tablero/reportar.log`.
+
+## Actualizar un compu ya instalado
+
+`reportar.py` y `cuentas` se instalan por copia: publicar en `main` solo
+actualiza la página. Para que un compu tome una versión nueva, vuelve a correr
+el mismo comando de instalación (es idempotente y no pide el PAT otra vez).
+
 Para probar la página con otro estado (p. ej. uno local) sin tocar el gist:
 `index.html?estado=<url-del-json>`.
 
